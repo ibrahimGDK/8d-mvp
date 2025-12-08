@@ -33,4 +33,51 @@ class CauseRepository {
     }
     
     // NOT: Bu katmanın görevi veriyi çekmek. Ağaç yapısına dönüştürme işi Service katmanında yapılacak.
+
+    public function findById(int $id): ?array {
+        $stmt = $this->db->prepare("SELECT * FROM causes WHERE id = :id");
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $data = $stmt->fetch();
+        return $data ?: null;
+    }
+
+    public function create(array $data): int {
+        $sql = "INSERT INTO causes (problem_id, parent_id, title, is_root_cause, action_plan)
+                VALUES (:problem_id, :parent_id, :title, :is_root_cause, :action_plan)";
+        $stmt = $this->db->prepare($sql);
+
+        $stmt->execute([
+            ':problem_id'   => $data['problem_id'],
+            ':parent_id'    => $data['parent_id'] ?? null,
+            ':title'        => $data['title'],
+            ':is_root_cause'=> $data['is_root_cause'] ?? 0,
+            ':action_plan'  => $data['action_plan'] ?? null,
+        ]);
+
+        return $this->db->lastInsertId();
+    }
+
+    public function update(int $id, array $data): bool {
+        $sql = "UPDATE causes 
+                SET title = :title, parent_id = :parent_id, is_root_cause = :is_root_cause, action_plan = :action_plan
+                WHERE id = :id";
+
+        $stmt = $this->db->prepare($sql);
+
+        return $stmt->execute([
+            ':id'           => $id,
+            ':parent_id'    => $data['parent_id'] ?? null,
+            ':title'        => $data['title'],
+            ':is_root_cause'=> $data['is_root_cause'] ?? 0,
+            ':action_plan'  => $data['action_plan'] ?? null
+        ]);
+    }
+
+    public function delete(int $id): bool {
+        $stmt = $this->db->prepare("DELETE FROM causes WHERE id = :id");
+        return $stmt->execute([':id' => $id]);
+    }
+
 }

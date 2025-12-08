@@ -17,7 +17,7 @@ class ProblemService {
     public function __construct(ProblemRepository $problemRepo, CauseRepository $causeRepo) {
         $this->problemRepo = $problemRepo;
         $this->causeRepo = $causeRepo;
-        $this->causeService = new CauseService(); // CauseService'i burada oluşturabiliriz.
+        $this->causeService = new CauseService($causeRepo); // CauseService'i burada oluşturabiliriz.
     }
 
     /**
@@ -39,7 +39,7 @@ class ProblemService {
      * @return Problem|null
      * @throws Exception
      */
-    public function getProblemWithCauses(int $problemId): ?Problem {
+    public function getProblemWithCauses(int $problemId) {
         // 1. Ana Problemi Çek
         $problemData = $this->problemRepo->findById($problemId);
 
@@ -69,4 +69,27 @@ class ProblemService {
             'causes_tree' => $causesTree
         ];
     }
+
+    // CREATE
+    public function createProblem(array $data): Problem {
+        $inserted = $this->problemRepo->insert($data);
+        return new Problem($inserted);
+    }
+
+    // UPDATE
+    public function updateProblem(int $id, array $data): ?Problem {
+        $existing = $this->problemRepo->findById($id);
+        if (!$existing) {
+            return null;
+        }
+
+        $updated = $this->problemRepo->updateRecord($id, $data);
+        return new Problem($updated);
+    }
+
+    // DELETE
+    public function deleteProblem(int $id): bool {
+        return $this->problemRepo->deleteRecord($id);
+    }
+
 }

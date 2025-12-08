@@ -4,7 +4,17 @@
 
 class CauseService {
     
-    // Bu servis, Dependency Injection ile bir Repository alabilir (Şimdilik ProblemService'e entegre edeceğiz).
+    private CauseRepository $repo;
+
+    public function __construct(CauseRepository $repo) {
+        $this->repo = $repo;
+    }
+    
+    /** Ağacı oluşturur */
+    public function getCauseTree(int $problemId): array {
+        $flat = $this->repo->findAllByProblemId($problemId);
+        return $this->buildTree($flat);
+    } 
 
     /**
      * Düz listeyi (flat list) hiyerarşik bir ağaç yapısına dönüştürür.
@@ -40,5 +50,21 @@ class CauseService {
         }
 
         return $branch;
+    }
+     /** CRUD */
+    public function getSingleCause(int $id): ?array {
+        return $this->repo->findById($id);
+    }
+
+    public function createCause(array $data): int {
+        return $this->repo->create($data);
+    }
+
+    public function updateCause(int $id, array $data): bool {
+        return $this->repo->update($id, $data);
+    }
+
+    public function deleteCause(int $id): bool {
+        return $this->repo->delete($id);
     }
 }

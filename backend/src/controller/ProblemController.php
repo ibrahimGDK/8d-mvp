@@ -63,11 +63,8 @@ class ProblemController {
         }
 
         try {
-            // Burası ProblemService'te yaratılacak 'createProblem' metodu çağırılacak
-            // $newProblem = $this->problemService->createProblem($input); 
-            
-            // Geçici olarak başarılı yanıt dönüyoruz, Service metodu henüz yazılmadı.
-            Response::success(["message" => "Problem başarıyla oluşturuldu.", "data" => $input], 201); // 201 Created
+            $problem = $this->problemService->createProblem($input);
+            Response::success($problem, 201);
 
         } catch (Exception $e) {
             Response::error("Problem oluşturulurken hata oluştu: " . $e->getMessage(), 500);
@@ -78,15 +75,42 @@ class ProblemController {
      * [PUT] /problems/{id} - Problem kaydını günceller. (update)
      */
     public function update(int $id): void {
-        // Bu metodun kodunu yazmaya şimdilik gerek yok, ancak mimari olarak yerini belirledik.
-        Response::success(["message" => "Problem $id başarıyla güncellendi."], 200);
+        $input = json_decode(file_get_contents("php://input"), true);
+
+        if (empty($input['title'])) {
+            Response::error("Başlık (title) alanı zorunludur.", 422);
+        }
+
+        try {
+            $updated = $this->problemService->updateProblem($id, $input);
+
+            if (!$updated) {
+                Response::error("Güncellenecek Problem bulunamadı.", 404);
+            }
+
+            Response::success($updated, 200);
+
+        } catch (Exception $e) {
+            Response::error("Problem güncellenirken hata oluştu: " . $e->getMessage(), 500);
+        }
     }
-    
+
     /**
      * [DELETE] /problems/{id} - Problem kaydını siler. (destroy)
      */
     public function destroy(int $id): void {
-        // Bu metodun kodunu yazmaya şimdilik gerek yok, ancak mimari olarak yerini belirledik.
-        Response::success(["message" => "Problem $id başarıyla silindi."], 200);
+        try {
+            $deleted = $this->problemService->deleteProblem($id);
+
+            if (!$deleted) {
+                Response::error("Silinecek Problem bulunamadı.", 404);
+            }
+
+            Response::success(["message" => "Problem başarıyla silindi."], 200);
+
+        } catch (Exception $e) {
+            Response::error("Problem silinirken hata oluştu: " . $e->getMessage(), 500);
+        }
     }
+
 }

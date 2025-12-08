@@ -37,6 +37,8 @@ require_once __DIR__ . '/../src/service/ProblemService.php';
 
 // Controller'lar (Servislere bağımlı)
 require_once __DIR__ . '/../src/controller/ProblemController.php';
+require_once __DIR__ . '/../src/controller/CauseController.php';
+
 
 // =======================================================
 // B. Ortak Ayarlar ve CORS
@@ -58,33 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // C. Router ve Controller İşlemleri
 // =======================================================
 
-// $uri = trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-// $segments = explode('/', $uri);
-// $method = $_SERVER['REQUEST_METHOD'];
 
-// // Varsayılan değerler
-// $controllerName = 'Problem';
-// $action = 'index';
-// $id = null; // URI'deki ID parametresi
-
-// // Örnek URI yapısı: /api/problems/123
-
-// // URI'nin ilk segmenti "api" veya "backend" olabilir, onu atlayalım.
-// if ($segments[0] === 'api' || $segments[0] === 'backend') {
-//     array_shift($segments); 
-// }
-
-// // 1. Segment: Controller (Örn: problems -> ProblemController)
-// if (!empty($segments[0])) {
-//     $controllerName = ucfirst(strtolower($segments[0]));
-//     // "problems" -> "Problem" Controller
-//     if (substr($controllerName, -1) === 's') { // Çoğuldan tekile çevir (Basit yaklasim)
-//          $controllerName = rtrim($controllerName, 's');
-//     }
-// }
-// $fullControllerName = $controllerName . 'Controller';
-
-$requestUri = $_SERVER['REQUEST_URI'];         // Örn: /8d-mvp/backend/public/index.php/problems/1
+/*$requestUri = $_SERVER['REQUEST_URI'];         // Örn: /8d-mvp/backend/public/index.php/problems/1
 $scriptName = $_SERVER['SCRIPT_NAME'];         // Örn: /8d-mvp/backend/public/index.php
 
 // Kök yolu (Script Name) kısmını URI'den siliyoruz.
@@ -93,6 +70,30 @@ $uri = str_replace($scriptName, '', $requestUri);
 // Geriye sadece temiz path kalır: /problems/1
 $uri = trim(parse_url($uri, PHP_URL_PATH), '/'); // Sonuç: "problems/1"
 $segments = explode('/', $uri);                   // Sonuç: ['problems', '1']
+*/
+
+// Örn: /8d-mvp/backend/public/index.php/problems/1
+$requestUri = $_SERVER['REQUEST_URI'];
+
+// Örn: /8d-mvp/backend/public
+$basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
+
+// Base path'i URI'den çıkar
+$cleanedUri = $requestUri;
+
+// Base path root değilse temizle
+if ($basePath !== '/') {
+    $cleanedUri = preg_replace('#^' . preg_quote($basePath) . '#', '', $cleanedUri);
+}
+
+// index.php kısmını da temizle
+$cleanedUri = preg_replace('#/index\.php#', '', $cleanedUri);
+
+// Sadece path kısmını çek
+$cleanedUri = trim(parse_url($cleanedUri, PHP_URL_PATH), '/');
+
+// Segmentlere ayır
+$segments = $cleanedUri === '' ? [] : explode('/', $cleanedUri);
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -146,20 +147,30 @@ if ($method === 'DELETE') $action = 'destroy';          // DELETE /problems/1 ->
 try {
     // 1. Repository'leri oluştur
     $problemRepo = new ProblemRepository(Database::getConnection());
-    $causeRepo = new CauseRepository(Database::getConnection());
+    $causeRepo   = new CauseRepository(Database::getConnection());
 
     // 2. Servisleri oluştur (Repository'leri Enjekte Et)
     $problemService = new ProblemService($problemRepo, $causeRepo);
+    $causeService   = new CauseService($causeRepo);
 
-    // 3. Controller'ı oluştur (Servisleri Enjekte Et)
-    $controller = new ProblemController($problemService);
-    
-    // Kontrol: İstenen Controller ve Aksiyon var mı?
-    if (!class_exists($fullControllerName) || !method_exists($controller, $action)) {
-        Response::json(["message" => "404 Not Found. Invalid Route or Action."], 404);
+    // 3. Controller yönlendirme – Hangi controller istenmişse onu oluştur
+    if ($fullControllerName === 'ProblemController') {
+        $controller = new ProblemController($problemService);
+
+    } elseif ($fullControllerName === 'CauseController') {
+        $controller = new CauseController($causeService);
+
+    } else {
+        Response::json(["message" => "404 Not Found. Controller Not Found."], 404);
         exit();
     }
-    
+
+    // Controller gerçekten var mı ve action mevcut mu kontrol et
+    if (!method_exists($controller, $action)) {
+        Response::json(["message" => "404 Not Found. Invalid Action."], 404);
+        exit();
+    }
+
     // Aksiyonu çalıştır
     if ($id !== null) {
         $controller->$action($id);
@@ -168,8 +179,8 @@ try {
     }
 
 } catch (Exception $e) {
-    // Herhangi bir yerde hata olursa (DB, servis, vs.), yakala ve hatayı döndür
     Response::json(["error" => $e->getMessage()], 500);
 }
+
 
 ?>
