@@ -1,0 +1,11 @@
+{
+  "name": "siemens/8d-problem-solving",
+  "description": "8D Problem Solving MVP Backend",
+  "type": "project",
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+  "require": {}
+}
