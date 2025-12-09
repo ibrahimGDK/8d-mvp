@@ -1,0 +1,123 @@
+// src/components/ProblemTable.jsx
+import React, { useEffect, useMemo, useState } from "react";
+import { AgGridReact } from "ag-grid-react";
+import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
+import * as agGrid from "ag-grid-community";
+import { getIxTheme } from "@siemens/ix-aggrid";
+
+import "ag-grid-community/styles/ag-grid.css";
+import "ag-grid-community/styles/ag-theme-alpine.css"; // fallback styling
+import { IxButton } from "@siemens/ix-react";
+import { useNavigate } from "react-router-dom";
+import { deleteProblem } from "../api/api";
+
+// register modules once
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+export default function ProblemTable({ problems, reload, openEditModal }) {
+  const navigate = useNavigate();
+  const [ixTheme, setIxTheme] = useState(null);
+
+  useEffect(() => {
+    try {
+      const theme = getIxTheme(agGrid);
+      setIxTheme(theme);
+    } catch (e) {
+      console.warn("IX theme yüklenemedi, fallback kullanılıyor.", e);
+      setIxTheme(null);
+    }
+  }, []);
+
+  const onView = (row) => {
+    navigate(`/problems/${row.id}`);
+  };
+
+  const onEdit = (row) => {
+    openEditModal(row); // ModalService ile editData gönderecek şekilde olmalı
+  };
+
+  const onDelete = async (row) => {
+    if (!confirm("Bu kaydı silmek istediğinize emin misiniz?")) return;
+    try {
+      await deleteProblem(row.id);
+      await reload();
+    } catch (err) {
+      console.error("Silme hatası:", err);
+      alert("Silme sırasında bir hata oluştu.");
+    }
+  };
+
+  // Action cell renderer as React component (framework component)
+  const ActionCell = (props) => {
+    const row = props.data;
+    return (
+      <div style={{ display: "flex", gap: 8 }}>
+        <IxButton
+          icon="chevron-right-small"
+          onClick={() => props.context.onView(row)}
+          title="Detay"
+        />
+        <IxButton
+          icon="edit"
+          variant="primary"
+          onClick={() => props.context.onEdit(row)}
+          title="Güncelle"
+        />
+        <IxButton
+          icon="delete"
+          variant="danger"
+          onClick={() => props.context.onDelete(row)}
+          title="Sil"
+        />
+      </div>
+    );
+  };
+
+  const columnDefs = useMemo(
+    () => [
+      { field: "id", headerName: "ID", minWidth: 90 },
+      { field: "title", headerName: "Başlık", flex: 1, minWidth: 200 },
+      { field: "responsible_team", headerName: "Sorumlu", minWidth: 150 },
+      { field: "status", headerName: "Durum", minWidth: 120 },
+      {
+        headerName: "İşlemler",
+        field: "actions",
+        width: 300,
+        sortable: false,
+        filter: false,
+        suppressMenu: true,
+        cellRenderer: "actionCell",
+      },
+    ],
+    []
+  );
+
+  const defaultColDef = useMemo(
+    () => ({
+      resizable: true,
+      sortable: true,
+      filter: true,
+      tooltipValueGetter: (params) => params.value,
+    }),
+    []
+  );
+
+  // context passed to cell renderers
+  const context = { onView, onEdit, onDelete };
+
+  const gridClass = ixTheme ? ixTheme : "ag-theme-alpine";
+
+  return (
+    <div style={{ width: "100%", height: "60vh" }} className={gridClass}>
+      <AgGridReact
+        rowData={problems}
+        columnDefs={columnDefs}
+        defaultColDef={defaultColDef}
+        components={{ actionCell: ActionCell }}
+        context={context}
+        suppressCellFocus={true}
+        domLayout="normal"
+      />
+    </div>
+  );
+}

@@ -8,6 +8,7 @@ class Problem {
     public $responsible_team;
     public $status; // OPEN / CLOSED
     public $created_at;
+    public $updated_at;
 
     // Basit bir constructor (isteğe bağlı)
     public function __construct($data = []) {
@@ -17,5 +18,6 @@ class Problem {
         $this->responsible_team = $data['responsible_team'] ?? null;
         $this->status = $data['status'] ?? 'OPEN';
         $this->created_at = $data['created_at'] ?? null;
+        $this->updated_at = $data['updated_at'] ?? null;
     }
 }

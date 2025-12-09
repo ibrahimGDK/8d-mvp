@@ -1,0 +1,34 @@
+/* Siemens fontları otomatik gelir ama body reset iyidir */
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: "Siemens Sans", sans-serif; /* iX fontu */
+}
+
+#root {
+  height: 100vh;
+}
+
+/* Basit Ağaç Yapısı Stili */
+ul {
+  list-style-type: none;
+  padding-left: 20px;
+}
+
+li {
+  position: relative;
+  margin: 10px 0;
+}
+
+/* Status Renkleri için Yardımcılar */
+.color-success {
+  color: var(--theme-color-success);
+}
+.color-alarm {
+  color: var(--theme-color-alarm);
+}
+.color-warning {
+  color: var(--theme-color-warning);
+}
