@@ -72,14 +72,11 @@ class ProblemController {
     }
     
     /**
-     * [PUT] /problems/{id} - Problem kaydını günceller. (update)
+     * [PATCH] /problems/{id} - Problem kaydını günceller. (update)
      */
     public function update(int $id): void {
-        $input = json_decode(file_get_contents("php://input"), true);
+        $input = json_decode(file_get_contents("php://input"), true) ?? [];
 
-        if (empty($input['title'])) {
-            Response::error("Başlık (title) alanı zorunludur.", 422);
-        }
 
         try {
             $updated = $this->problemService->updateProblem($id, $input);

@@ -82,9 +82,15 @@ class ProblemService {
         if (!$existing) {
             return null;
         }
+            // PATCH: Sadece gönderilen alanları günceller
+    $payload = [
+        'title'            => array_key_exists('title', $data) ? $data['title'] : $existing['title'],
+        'description'      => array_key_exists('description', $data) ? $data['description'] : $existing['description'],
+        'responsible_team' => array_key_exists('responsible_team', $data) ? $data['responsible_team'] : $existing['responsible_team'],
+    ];
 
-        $updated = $this->problemRepo->updateRecord($id, $data);
-        return new Problem($updated);
+        $updated = $this->problemRepo->updateRecord($id, $payload);
+        return $updated ? new Problem($updated) : null;
     }
 
     // DELETE

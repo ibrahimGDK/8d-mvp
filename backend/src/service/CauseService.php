@@ -61,7 +61,21 @@ class CauseService {
     }
 
     public function updateCause(int $id, array $data): bool {
-        return $this->repo->update($id, $data);
+        // Mevcut kaydı al
+        $existing = $this->repo->findById($id);
+        if (!$existing) {
+            return false;
+        }
+
+        // PATCH: sadece gönderilen alanları değiştir; gönderilmeyenler korunur.
+        $payload = [
+            'title'         => array_key_exists('title', $data) ? $data['title'] : $existing['title'],
+            'parent_id'     => array_key_exists('parent_id', $data) ? $data['parent_id'] : $existing['parent_id'],
+            'is_root_cause' => array_key_exists('is_root_cause', $data) ? $data['is_root_cause'] : $existing['is_root_cause'],
+            'action_plan'   => array_key_exists('action_plan', $data) ? $data['action_plan'] : $existing['action_plan'],
+        ];
+
+        return $this->repo->update($id, $payload);
     }
 
     public function deleteCause(int $id): bool {

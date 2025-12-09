@@ -81,8 +81,8 @@ class ProblemRepository {
         $stmt->execute([
             ':id'          => $id,
             ':title'       => $data['title'],
-            ':description' => $data['description'] ?? null,
-            ':team'        => $data['responsible_team'] ?? null,
+            ':description' => array_key_exists('description', $data) ? $data['description'] : null,
+            ':team'        => array_key_exists('responsible_team', $data) ? $data['responsible_team'] : null,
         ]);
 
         return $this->findById($id);

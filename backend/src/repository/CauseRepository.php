@@ -67,11 +67,11 @@ class CauseRepository {
         $stmt = $this->db->prepare($sql);
 
         return $stmt->execute([
-            ':id'           => $id,
-            ':parent_id'    => $data['parent_id'] ?? null,
-            ':title'        => $data['title'],
-            ':is_root_cause'=> $data['is_root_cause'] ?? 0,
-            ':action_plan'  => $data['action_plan'] ?? null
+            ':id'            => $id,
+            ':parent_id'     => array_key_exists('parent_id', $data) ? $data['parent_id'] : null,
+            ':title'         => $data['title'],
+            ':is_root_cause' => array_key_exists('is_root_cause', $data) ? $data['is_root_cause'] : 0,
+            ':action_plan'   => array_key_exists('action_plan', $data) ? $data['action_plan'] : null
         ]);
     }
 

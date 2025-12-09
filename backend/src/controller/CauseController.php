@@ -58,13 +58,10 @@ class CauseController {
         }
     }
 
-    /** [PUT] /causes/{id} */
+    /** [PATCH] /causes/{id} */
     public function update(int $id): void {
-        $input = json_decode(file_get_contents("php://input"), true);
-
-        if (empty($input['title'])) {
-            Response::error("title zorunludur.", 422);
-        }
+        // json_decode null dönebilir; fallback ile boş dizi kullanıyoruz
+        $input = json_decode(file_get_contents("php://input"), true) ?? [];
 
         try {
             $ok = $this->service->updateCause($id, $input);
