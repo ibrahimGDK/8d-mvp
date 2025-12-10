@@ -36,7 +36,7 @@ export default function Dashboard() {
           marginBottom: "1.5rem",
         }}
       >
-        <h2>8D Problem Listesi</h2>
+        <h2>8D Problem Listesi (D1-D2)</h2>
         <IxButton icon="plus" onClick={handleCreate}>
           Yeni Problem
         </IxButton>

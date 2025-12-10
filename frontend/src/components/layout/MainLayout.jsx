@@ -5,6 +5,7 @@ import {
   IxMenuItem,
   IxMenuCategory,
 } from "@siemens/ix-react";
+import { iconHome } from '@siemens/ix-icons/icons';
 
 export default function MainLayout() {
   const navigate = useNavigate();
@@ -17,24 +18,22 @@ export default function MainLayout() {
       <IxMenu>
         <IxMenuItem
           home
-          tabIcon="home"
+          icon={iconHome}
           slot="bottom"
           onClick={() => navigate("/")}
         >
           Ana Sayfa
         </IxMenuItem>
 
-        <IxMenuItem
+        {/* <IxMenuItem
           icon="document"
           active={location.pathname === "/"}
           onClick={() => navigate("/")}
         >
           Problem Listesi
-        </IxMenuItem>
+        </IxMenuItem> */}
 
-        <IxMenuCategory label="Ayarlar" icon="settings">
-          <IxMenuItem icon="user">Profil</IxMenuItem>
-        </IxMenuCategory>
+
       </IxMenu>
 
       {/* Sayfaların render edileceği alan */}

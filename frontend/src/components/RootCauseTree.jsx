@@ -219,7 +219,7 @@ export default function RootCauseTree({
         {node.is_root_cause === 1 && editingActionFor !== node.id && (
           <div style={{ marginTop: 6, marginLeft: 36 }}>
             <IxButton icon="edit" onClick={() => startEditAction(node)}>
-              Aksiyon Ekle / Düzenle
+              Aksiyon Ekle / Düzenle (D5)
             </IxButton>
           </div>
         )}

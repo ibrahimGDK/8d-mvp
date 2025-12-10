@@ -5,7 +5,6 @@ import { AgGridReact } from "ag-grid-react";
 import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
 import * as agGrid from "ag-grid-community";
 import { getIxTheme } from "@siemens/ix-aggrid";
-
 import "ag-grid-community/styles/ag-theme-alpine.css";
 import { IxButton } from "@siemens/ix-react";
 import { useNavigate } from "react-router-dom";

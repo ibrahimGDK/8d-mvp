@@ -58,9 +58,9 @@ export default function ProblemModal({ editData = null, onSubmit, onClose }) {
       }
 
       // success → modalı kapat
-       if (typeof onClose === "function") {
-         onClose();
-       }
+      if (typeof onClose === "function") {
+        onClose();
+      }
     } catch (err) {
       console.error("ProblemModal submit error:", err);
       alert("Kaydedilirken bir hata oluştu.");
@@ -70,7 +70,7 @@ export default function ProblemModal({ editData = null, onSubmit, onClose }) {
   };
 
   return (
-    <IxModal onClose={onClose}>
+    <IxModal onCloseClick={onClose}>
       <IxModalHeader>
         {isEdit ? "Problemi Güncelle" : "Yeni Problem Ekle"}
       </IxModalHeader>

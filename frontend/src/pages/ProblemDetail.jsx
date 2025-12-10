@@ -61,12 +61,7 @@ export default function ProblemDetail() {
   };
 
   const handleDeleteCause = async (causeId) => {
-    if (
-      !confirm(
-        "Bu nedeni silmek istediğinize emin misiniz? Alt nedenler de etkilenebilir."
-      )
-    )
-      return;
+
     await deleteMutation.mutateAsync({ id: causeId, problemId: problem.id });
     await refetchCauses();
   };
@@ -136,9 +131,7 @@ export default function ProblemDetail() {
         <ix-tab-item onClick={() => setSelectedTab(1)} icon="tree">
           D4: Kök Neden
         </ix-tab-item>
-        <ix-tab-item onClick={() => setSelectedTab(2)} icon="task">
-          D5: Aksiyonlar
-        </ix-tab-item>
+
       </ix-tabs>
 
       <div style={{ marginTop: "1.5rem" }}>
@@ -146,7 +139,7 @@ export default function ProblemDetail() {
           <ix-card>
             <ix-card-content>
               <ix-typography format="h5" style={{ marginBottom: "10px" }}>
-                Problem Tanımı
+                Problem Tanımı (D1-D2)
               </ix-typography>
               <p className="ix-typography">{problem.description}</p>
             </ix-card-content>
