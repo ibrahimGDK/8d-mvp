@@ -10,21 +10,22 @@ import ProblemModal from "./ProblemModal";
 export function openProblemModal(onSaved, editData = null) {
   let modalRef = null;
 
+  const closeModal = () => {
+    try {
+      if (modalRef?.close) modalRef.close();
+      else if (modalRef?.dismiss) modalRef.dismiss();
+      else if (typeof modalRef === "function") modalRef();
+    } catch (e) {
+      console.warn("Modal kapatılamadı:", e);
+    }
+  };
+
   modalRef = showModal({
     content: (
       <ProblemModal
         editData={editData}
-        onSaved={onSaved}
-        onClose={() => {
-          try {
-            // showModal farklı versiyonlarda close/dismiss olabilir
-            if (modalRef?.close) modalRef.close();
-            else if (modalRef?.dismiss) modalRef.dismiss();
-            else if (typeof modalRef === "function") modalRef();
-          } catch (e) {
-            console.warn("Modal kapatılamadı:", e);
-          }
-        }}
+        onSubmit={onSaved}
+        onClose={closeModal}
       />
     ),
     config: { size: "640" },

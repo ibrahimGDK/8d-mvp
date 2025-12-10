@@ -1,4 +1,5 @@
 // src/components/ProblemModal.jsx
+
 import React, { useEffect, useState } from "react";
 import {
   IxModal,
@@ -10,18 +11,18 @@ import {
   IxTextarea,
 } from "@siemens/ix-react";
 
-import { createProblem, updateProblem } from "../api/api";
-
-export default function ProblemModal({ editData = null, onSaved, onClose }) {
+export default function ProblemModal({ editData = null, onSubmit, onClose }) {
   const [form, setForm] = useState({
     title: "",
     description: "",
     responsible_team: "",
   });
+
   const [loading, setLoading] = useState(false);
 
   const isEdit = !!editData;
 
+  // Formu doldur
   useEffect(() => {
     if (isEdit) {
       setForm({
@@ -30,31 +31,29 @@ export default function ProblemModal({ editData = null, onSaved, onClose }) {
         responsible_team: editData.responsible_team || "",
       });
     } else {
-      setForm({ title: "", description: "", responsible_team: "" });
+      setForm({
+        title: "",
+        description: "",
+        responsible_team: "",
+      });
     }
-  }, [editData, isEdit]);
+  }, [isEdit, editData]);
 
   const handleSubmit = async () => {
+    if (loading) return;
+
     setLoading(true);
     try {
-      if (isEdit) {
-        await updateProblem(editData.id, form);
-      } else {
-        await createProblem(form);
+      // Modal CRUD yapmaz → sadece formu parent’a gönderir
+      if (typeof onSubmit === "function") {
+        await onSubmit(form);
       }
 
-      // listeyi yenile
-      try {
-        if (typeof onSaved === "function") onSaved();
-      } catch (e) {
-        console.error("onSaved callback hatası:", e);
-      }
-
-      // modalı kapat
+      // success → modalı kapat
       if (typeof onClose === "function") onClose();
-    } catch (error) {
-      console.error("Problem kaydetme hatası:", error);
-      alert("Problem kaydedilemedi. Lütfen tekrar deneyin.");
+    } catch (err) {
+      console.error("ProblemModal submit error:", err);
+      alert("Kaydedilirken bir hata oluştu.");
     } finally {
       setLoading(false);
     }
@@ -73,11 +72,13 @@ export default function ProblemModal({ editData = null, onSaved, onClose }) {
             value={form.title}
             onInput={(e) => setForm({ ...form, title: e.target.value })}
           />
+
           <IxTextarea
             label="Açıklama"
             value={form.description}
             onInput={(e) => setForm({ ...form, description: e.target.value })}
           />
+
           <IxInput
             label="Sorumlu Ekip"
             value={form.responsible_team}
@@ -92,6 +93,7 @@ export default function ProblemModal({ editData = null, onSaved, onClose }) {
         <IxButton outline onClick={onClose} disabled={loading}>
           İptal
         </IxButton>
+
         <IxButton onClick={handleSubmit} disabled={loading}>
           {loading
             ? isEdit

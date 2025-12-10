@@ -1,32 +1,31 @@
 // src/pages/Dashboard.jsx
-import { useEffect, useState } from "react";
-import { getProblems } from "../api/api";
+
 import { IxButton } from "@siemens/ix-react";
-import { openProblemModal } from "../components/ModalService";
 import ProblemTable from "../components/ProblemTable";
+import { openProblemModal } from "../components/ModalService";
+import {
+  useProblemList,
+  useCreateProblem,
+  useUpdateProblem,
+} from "../hooks/useProblems";
 
 export default function Dashboard() {
-  const [problems, setProblems] = useState([]);
+  const { data: problems, isLoading: loading } = useProblemList();
+  const createProblemMutation = useCreateProblem();
+  const updateProblemMutation = useUpdateProblem();
 
-  const load = async () => {
-    try {
-      const res = await getProblems();
-      // backend response shape: res.data.data bekleniyor (senin koduna göre)
-      setProblems(res.data?.data || []);
-    } catch (e) {
-      console.error("API Hatası:", e);
-    }
-  };
+  const handleCreate = () =>
+    openProblemModal(async (form) => {
+      await createProblemMutation.mutateAsync(form);
+    });
 
-  useEffect(() => {
-    load();
-  }, []);
-
-  // Yeni problem (create)
-  const handleCreate = () => openProblemModal(load);
-
-  // Var olan problemi düzenle (ProblemTable çağıracak editData ile)
-  const handleEdit = (problem) => openProblemModal(load, problem);
+  const handleEdit = (existingProblem) =>
+    openProblemModal(async (form) => {
+      await updateProblemMutation.mutateAsync({
+        id: existingProblem.id,
+        data: form,
+      });
+    }, existingProblem);
 
   return (
     <div style={{ padding: "2rem" }}>
@@ -43,11 +42,9 @@ export default function Dashboard() {
         </IxButton>
       </div>
 
-      <ProblemTable
-        problems={problems}
-        reload={load}
-        openEditModal={handleEdit}
-      />
+      <ProblemTable problems={problems} openEditModal={handleEdit} />
+
+      {loading && <div>Yükleniyor...</div>}
     </div>
   );
 }

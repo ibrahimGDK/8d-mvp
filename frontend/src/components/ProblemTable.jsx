@@ -1,23 +1,27 @@
 // src/components/ProblemTable.jsx
+
 import React, { useEffect, useMemo, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
 import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
 import * as agGrid from "ag-grid-community";
 import { getIxTheme } from "@siemens/ix-aggrid";
 
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-alpine.css"; // fallback styling
+import "ag-grid-community/styles/ag-theme-alpine.css"; // modern tema importu
 import { IxButton } from "@siemens/ix-react";
 import { useNavigate } from "react-router-dom";
-import { deleteProblem } from "../api/api";
+import { useProblemList, useDeleteProblem } from "../hooks/useProblems";
 
-// register modules once
 ModuleRegistry.registerModules([AllCommunityModule]);
 
-export default function ProblemTable({ problems, reload, openEditModal }) {
+export default function ProblemTable({ openEditModal }) {
   const navigate = useNavigate();
   const [ixTheme, setIxTheme] = useState(null);
 
+  // Hooklar
+  const { data: problems = [], isLoading } = useProblemList();
+  const deleteMutation = useDeleteProblem();
+
+  // IX theme yükleme
   useEffect(() => {
     try {
       const theme = getIxTheme(agGrid);
@@ -33,21 +37,20 @@ export default function ProblemTable({ problems, reload, openEditModal }) {
   };
 
   const onEdit = (row) => {
-    openEditModal(row); // ModalService ile editData gönderecek şekilde olmalı
+    openEditModal(row);
   };
 
   const onDelete = async (row) => {
     if (!confirm("Bu kaydı silmek istediğinize emin misiniz?")) return;
     try {
-      await deleteProblem(row.id);
-      await reload();
+      await deleteMutation.mutateAsync(row.id);
     } catch (err) {
       console.error("Silme hatası:", err);
       alert("Silme sırasında bir hata oluştu.");
     }
   };
 
-  // Action cell renderer as React component (framework component)
+  // Action cell renderer
   const ActionCell = (props) => {
     const row = props.data;
     return (
@@ -102,10 +105,8 @@ export default function ProblemTable({ problems, reload, openEditModal }) {
     []
   );
 
-  // context passed to cell renderers
   const context = { onView, onEdit, onDelete };
-
-  const gridClass = ixTheme ? ixTheme : "ag-theme-alpine";
+  const gridClass = ixTheme || "ag-theme-alpine";
 
   return (
     <div style={{ width: "100%", height: "60vh" }} className={gridClass}>

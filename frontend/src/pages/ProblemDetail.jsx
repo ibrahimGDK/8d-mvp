@@ -1,37 +1,99 @@
 // src/pages/ProblemDetail.jsx
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { getProblem } from "../api/api";
+import { useProblemQuery } from "../hooks/useProblems";
+import {
+  useCausesByProblem,
+  useCreateCause,
+  useUpdateCause,
+  useDeleteCause,
+  useMarkAsRoot,
+  useSaveActionPlan,
+} from "../hooks/useCauses";
 import RootCauseTree from "../components/RootCauseTree";
 import { IxButton } from "@siemens/ix-react";
 
 export default function ProblemDetail() {
   const { id } = useParams();
-  const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { data: problemResponse, isLoading: problemLoading } =
+    useProblemQuery(id);
+
+  const {
+    data: causesResponse,
+    isLoading: causesLoading,
+    refetch: refetchCauses,
+  } = useCausesByProblem(id);
+
+  const createMutation = useCreateCause();
+  const updateMutation = useUpdateCause();
+  const deleteMutation = useDeleteCause();
+  const markRootMutation = useMarkAsRoot();
+  const saveActionMutation = useSaveActionPlan();
+
   const [selectedTab, setSelectedTab] = useState(0);
 
-  const load = async () => {
-    setLoading(true);
-    try {
-      const res = await getProblem(id);
-      // backend yapısına göre res.data.data bekleniyor
-      setData(res.data?.data || null);
-    } catch (error) {
-      console.error("Detay yüklenemedi", error);
-      setData(null);
-    } finally {
-      setLoading(false);
+  if (problemLoading || causesLoading)
+    return <div style={{ padding: 20 }}>Yükleniyor...</div>;
+
+  const problem = problemResponse?.data?.problem;
+  if (!problem) return <div style={{ padding: 20 }}>Problem bulunamadı.</div>;
+
+  // causesResponse is the axios response — extract array
+  const causes = causesResponse?.data || [];
+
+  // Handlers wired to hooks:
+  const handleAddCause = async (parentId, title, problemId) => {
+    if (!title || !title.trim()) {
+      alert("Lütfen bir başlık giriniz.");
+      return;
     }
+
+    const payload = {
+      title: title.trim(),
+      problem_id: problem.id,
+      parent_id: parentId === "root" ? null : parentId,
+      // also pass problemId for cache invalidation convenience
+      problemId: problemId ?? problem.id,
+    };
+    await createMutation.mutateAsync(payload);
+    // refetch is optional because hook invalidation should refresh — but safe to refetch
+    await refetchCauses();
   };
 
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+  const handleDeleteCause = async (causeId) => {
+    if (
+      !confirm(
+        "Bu nedeni silmek istediğinize emin misiniz? Alt nedenler de etkilenebilir."
+      )
+    )
+      return;
+    await deleteMutation.mutateAsync({ id: causeId, problemId: problem.id });
+    await refetchCauses();
+  };
 
-  if (loading) return <div style={{ padding: 20 }}>Yükleniyor...</div>;
-  if (!data) return <div style={{ padding: 20 }}>Problem bulunamadı.</div>;
+  const handleMarkRoot = async (causeId) => {
+    await markRootMutation.mutateAsync({ id: causeId, problemId: problem.id });
+    await refetchCauses();
+  };
+
+  const handleSaveAction = async (causeId, actionText) => {
+    await saveActionMutation.mutateAsync({
+      id: causeId,
+      plan: actionText,
+      problemId: problem.id,
+    });
+    await refetchCauses();
+  };
+
+  const handleUpdateCause = async (causeId, data) => {
+    // if you need to update title or other fields
+    await updateMutation.mutateAsync({
+      id: causeId,
+      data,
+      problemId: problem.id,
+    });
+    await refetchCauses();
+  };
 
   return (
     <div style={{ padding: "20px" }}>
@@ -43,7 +105,7 @@ export default function ProblemDetail() {
           paddingBottom: "1rem",
         }}
       >
-        <ix-typography format="h3">{data.problem.title}</ix-typography>
+        <ix-typography format="h3">{problem.title}</ix-typography>
         <div
           style={{
             display: "flex",
@@ -53,16 +115,16 @@ export default function ProblemDetail() {
           }}
         >
           <span className="ix-typography color-secondary">
-            ID: #{data.problem.id}
+            ID: #{problem.id}
           </span>
           <span className="ix-typography color-secondary">|</span>
           <span className="ix-typography color-secondary">
-            Ekip: {data.problem.responsible_team}
+            Ekip: {problem.responsible_team}
           </span>
         </div>
       </div>
 
-      {/* Sekmeler (Tabs) */}
+      {/* Sekmeler */}
       <ix-tabs>
         <ix-tab-item onClick={() => setSelectedTab(0)} icon="info">
           Genel Bakış
@@ -75,21 +137,18 @@ export default function ProblemDetail() {
         </ix-tab-item>
       </ix-tabs>
 
-      {/* İçerik Alanı */}
       <div style={{ marginTop: "1.5rem" }}>
-        {/* TAB 0: Genel Bakış */}
         {selectedTab === 0 && (
           <ix-card>
             <ix-card-content>
               <ix-typography format="h5" style={{ marginBottom: "10px" }}>
                 Problem Tanımı
               </ix-typography>
-              <p className="ix-typography">{data.problem.description}</p>
+              <p className="ix-typography">{problem.description}</p>
             </ix-card-content>
           </ix-card>
         )}
 
-        {/* TAB 1: Kök Neden Analizi */}
         {selectedTab === 1 && (
           <ix-card style={{ width: "100%" }}>
             <ix-card-content>
@@ -98,15 +157,20 @@ export default function ProblemDetail() {
               </ix-typography>
 
               <RootCauseTree
-                problemId={data.problem.id}
-                causes={data.causes_tree || []}
-                onChange={load} // tree'de değişiklik olursa tekrar yükle
+                problemId={problem.id}
+                causes={causes}
+                onAddCause={(parentId, title) =>
+                  handleAddCause(parentId, title, problem.id)
+                }
+                onDeleteCause={handleDeleteCause}
+                onMarkRoot={handleMarkRoot}
+                onSaveAction={handleSaveAction}
+                onUpdateCause={handleUpdateCause} // optional, if your tree supports update
               />
             </ix-card-content>
           </ix-card>
         )}
 
-        {/* TAB 2: Aksiyonlar (Placeholder: burada daha detaylı listelenebilir) */}
         {selectedTab === 2 && (
           <ix-card>
             <ix-card-content>
