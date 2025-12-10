@@ -8,8 +8,9 @@ import { IxButton, IxChip, IxInput, IxTypography } from "@siemens/ix-react";
  * - causes (array)
  * - onAddCause(parentId, title)
  * - onDeleteCause(causeId)
- * - onMarkRoot(causeId)
+ * - onMarkRoot(causeId, newValue)
  * - onSaveAction(causeId, actionText)
+ * - onUpdateCause(causeId, data)
  */
 export default function RootCauseTree({
   problemId,
@@ -18,12 +19,15 @@ export default function RootCauseTree({
   onDeleteCause,
   onMarkRoot,
   onSaveAction,
+  onUpdateCause,
 }) {
   const [addingFor, setAddingFor] = useState(null);
   const [newTitle, setNewTitle] = useState("");
   const [expanded, setExpanded] = useState({});
   const [editingActionFor, setEditingActionFor] = useState(null);
   const [actionText, setActionText] = useState("");
+  const [editingTitleFor, setEditingTitleFor] = useState(null);
+  const [editedTitle, setEditedTitle] = useState("");
 
   const toggleExpand = (id) => setExpanded((s) => ({ ...s, [id]: !s[id] }));
 
@@ -37,6 +41,23 @@ export default function RootCauseTree({
       await onSaveAction(node.id, actionText);
       setEditingActionFor(null);
       setActionText("");
+    }
+  };
+
+  const startEditTitle = (node) => {
+    setEditingTitleFor(node.id);
+    setEditedTitle(node.title);
+  };
+
+  const saveTitle = async (node) => {
+    if (!editedTitle.trim()) {
+      alert("Başlık boş olamaz.");
+      return;
+    }
+    if (typeof onUpdateCause === "function") {
+      await onUpdateCause(node.id, { title: editedTitle.trim() });
+      setEditingTitleFor(null);
+      setEditedTitle("");
     }
   };
 
@@ -66,7 +87,8 @@ export default function RootCauseTree({
 
   const markRoot = async (node) => {
     if (typeof onMarkRoot === "function") {
-      await onMarkRoot(node.id);
+      const newValue = node.is_root_cause === 1 ? 0 : 1;
+      await onMarkRoot(node.id, newValue);
     }
   };
 
@@ -130,11 +152,28 @@ export default function RootCauseTree({
               }}
             />
             <IxButton
+              icon="edit"
+              variant="outline"
+              title="Sebepi Güncelle"
+              onClick={() => startEditTitle(node)}
+            >
+              Sebepi Güncelle
+            </IxButton>
+            <IxButton
               icon="target"
               variant={node.is_root_cause === 1 ? "primary" : "outline"}
-              title="Kök Neden Olarak İşaretle"
+              title={
+                node.is_root_cause === 1
+                  ? "Kök Nedeni Kaldır"
+                  : "Kök Neden Olarak İşaretle"
+              }
               onClick={() => markRoot(node)}
-            />
+            >
+              {node.is_root_cause === 1
+                ? "Kök Nedeni Kaldır"
+                : "Kök Neden Olarak İşaretle"}
+            </IxButton>
+
             <IxButton
               icon="trash"
               variant="danger"
@@ -143,6 +182,23 @@ export default function RootCauseTree({
             />
           </div>
         </div>
+
+        {/* Edit title input */}
+        {editingTitleFor === node.id && (
+          <div
+            style={{ marginTop: 8, marginLeft: 36, display: "flex", gap: 8 }}
+          >
+            <IxInput
+              label="Sebep Başlığı"
+              value={editedTitle}
+              onInput={(e) => setEditedTitle(e.target.value)}
+            />
+            <IxButton onClick={() => saveTitle(node)}>Kaydet</IxButton>
+            <IxButton outline onClick={() => setEditingTitleFor(null)}>
+              İptal
+            </IxButton>
+          </div>
+        )}
 
         {/* Action Input */}
         {node.is_root_cause === 1 && editingActionFor === node.id && (

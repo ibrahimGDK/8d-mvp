@@ -9,9 +9,8 @@ export const CausesApi = {
   delete: (id) => api.delete(`/causes/${id}`),
 
   // root cause işaretleme
-  markRoot: (id) => api.put(`/causes/${id}`, { is_root_cause: 1 }),
+  markRoot: (id, is_root_cause) => api.put(`/causes/${id}`, { is_root_cause }),
 
   // action plan kaydetme
-  saveActionPlan: (id, plan) =>
-    api.put(`/causes/${id}`, { action_plan: plan }),
+  saveActionPlan: (id, plan) => api.put(`/causes/${id}`, { action_plan: plan }),
 };

@@ -71,8 +71,12 @@ export default function ProblemDetail() {
     await refetchCauses();
   };
 
-  const handleMarkRoot = async (causeId) => {
-    await markRootMutation.mutateAsync({ id: causeId, problemId: problem.id });
+  const handleMarkRoot = async (causeId, isRoot) => {
+    await markRootMutation.mutateAsync({
+      id: causeId,
+      problemId: problem.id,
+      is_root_cause: isRoot, // toggle edilen değer gönderiliyor
+    });
     await refetchCauses();
   };
 

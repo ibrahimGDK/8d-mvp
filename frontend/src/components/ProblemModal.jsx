@@ -9,6 +9,8 @@ import {
   IxButton,
   IxInput,
   IxTextarea,
+  IxSelect,
+  IxSelectItem,
 } from "@siemens/ix-react";
 
 export default function ProblemModal({ editData = null, onSubmit, onClose }) {
@@ -16,6 +18,8 @@ export default function ProblemModal({ editData = null, onSubmit, onClose }) {
     title: "",
     description: "",
     responsible_team: "",
+    status: "OPEN",
+    priority: "medium",
   });
 
   const [loading, setLoading] = useState(false);
@@ -29,12 +33,16 @@ export default function ProblemModal({ editData = null, onSubmit, onClose }) {
         title: editData.title || "",
         description: editData.description || "",
         responsible_team: editData.responsible_team || "",
+        status: editData.status || "OPEN",
+        priority: editData.priority || "medium",
       });
     } else {
       setForm({
         title: "",
         description: "",
         responsible_team: "",
+        status: "OPEN",
+        priority: "medium",
       });
     }
   }, [isEdit, editData]);
@@ -50,7 +58,9 @@ export default function ProblemModal({ editData = null, onSubmit, onClose }) {
       }
 
       // success → modalı kapat
-      if (typeof onClose === "function") onClose();
+       if (typeof onClose === "function") {
+         onClose();
+       }
     } catch (err) {
       console.error("ProblemModal submit error:", err);
       alert("Kaydedilirken bir hata oluştu.");
@@ -86,6 +96,24 @@ export default function ProblemModal({ editData = null, onSubmit, onClose }) {
               setForm({ ...form, responsible_team: e.target.value })
             }
           />
+          <IxSelect
+            label="Durum"
+            value={form.status}
+            onValueChange={(e) => setForm({ ...form, status: e.detail })}
+          >
+            <IxSelectItem label="Açık" value="OPEN"></IxSelectItem>
+            <IxSelectItem label="Kapalı" value="CLOSE"></IxSelectItem>
+          </IxSelect>
+
+          <IxSelect
+            label="Öncelik"
+            value={form.priority}
+            onValueChange={(e) => setForm({ ...form, priority: e.detail })}
+          >
+            <IxSelectItem label="Düşük" value="low"></IxSelectItem>
+            <IxSelectItem label="Orta" value="medium"></IxSelectItem>
+            <IxSelectItem label="Yüksek" value="high"></IxSelectItem>
+          </IxSelect>
         </form>
       </IxModalContent>
 

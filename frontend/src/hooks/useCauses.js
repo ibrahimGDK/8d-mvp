@@ -55,7 +55,8 @@ export const useDeleteCause = () => {
 export const useMarkAsRoot = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id }) => CausesApi.markRoot(id),
+    mutationFn: ({ id, is_root_cause }) =>
+      CausesApi.markRoot(id, is_root_cause),
     onSuccess: (_, variables) => {
       const problemId = variables?.problemId;
       if (problemId) queryClient.invalidateQueries(["causes", problemId]);

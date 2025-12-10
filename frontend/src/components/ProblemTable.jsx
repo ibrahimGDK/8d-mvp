@@ -6,7 +6,7 @@ import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
 import * as agGrid from "ag-grid-community";
 import { getIxTheme } from "@siemens/ix-aggrid";
 
-import "ag-grid-community/styles/ag-theme-alpine.css"; // modern tema importu
+import "ag-grid-community/styles/ag-theme-alpine.css";
 import { IxButton } from "@siemens/ix-react";
 import { useNavigate } from "react-router-dom";
 import { useProblemList, useDeleteProblem } from "../hooks/useProblems";
@@ -17,11 +17,9 @@ export default function ProblemTable({ openEditModal }) {
   const navigate = useNavigate();
   const [ixTheme, setIxTheme] = useState(null);
 
-  // Hooklar
   const { data: problems = [], isLoading } = useProblemList();
   const deleteMutation = useDeleteProblem();
 
-  // IX theme yükleme
   useEffect(() => {
     try {
       const theme = getIxTheme(agGrid);
@@ -32,14 +30,8 @@ export default function ProblemTable({ openEditModal }) {
     }
   }, []);
 
-  const onView = (row) => {
-    navigate(`/problems/${row.id}`);
-  };
-
-  const onEdit = (row) => {
-    openEditModal(row);
-  };
-
+  const onView = (row) => navigate(`/problems/${row.id}`);
+  const onEdit = (row) => openEditModal(row);
   const onDelete = async (row) => {
     if (!confirm("Bu kaydı silmek istediğinize emin misiniz?")) return;
     try {
@@ -50,7 +42,6 @@ export default function ProblemTable({ openEditModal }) {
     }
   };
 
-  // Action cell renderer
   const ActionCell = (props) => {
     const row = props.data;
     return (
@@ -81,7 +72,39 @@ export default function ProblemTable({ openEditModal }) {
       { field: "id", headerName: "ID", minWidth: 90 },
       { field: "title", headerName: "Başlık", flex: 1, minWidth: 200 },
       { field: "responsible_team", headerName: "Sorumlu", minWidth: 150 },
-      { field: "status", headerName: "Durum", minWidth: 120 },
+      {
+        field: "status",
+        headerName: "Durum",
+        minWidth: 120,
+        valueFormatter: (params) => {
+          switch (params.value?.toLowerCase()) {
+            case "open":
+              return "Açık";
+            case "close":
+              return "Kapalı";
+            default:
+              return params.value ?? "-";
+          }
+        },
+      },
+      {
+        field: "priority",
+        headerName: "Öncelik",
+        minWidth: 120,
+        valueFormatter: (params) => {
+          switch (params.value?.toLowerCase()) {
+            case "low":
+              return "Düşük";
+            case "medium":
+              return "Orta";
+            case "high":
+              return "Yüksek";
+            default:
+              return params.value ?? "-";
+          }
+        },
+      },
+      { field: "created_at", headerName: "Oluşturulma Tarihi", minWidth: 150 },
       {
         headerName: "İşlemler",
         field: "actions",

@@ -24,12 +24,17 @@ export function openProblemModal(onSaved, editData = null) {
     content: (
       <ProblemModal
         editData={editData}
-        onSubmit={onSaved}
-        onClose={closeModal}
+        onSubmit={async (form) => {
+          await onSaved(form); // önce kayıt işlemini bitir
+          closeModal(); // sonra modalı kapat
+        }}
+        onClose={closeModal} // İPTAL → kapat
       />
     ),
     config: { size: "640" },
   });
+
+  // modalRef.addEventListener("close", () => closeModal());
 
   return modalRef;
 }
