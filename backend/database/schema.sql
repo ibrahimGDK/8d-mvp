@@ -1,6 +1,7 @@
 -- --------------------------------------------------------
 -- XRAMP / LOCAL INSTALLATION READY SQL SCHEMA
 -- --------------------------------------------------------
+DROP DATABASE IF EXISTS 8d_db;
 
 -- 1. DATABASE OLUŞTURMA
 CREATE DATABASE IF NOT EXISTS 8d_db 
