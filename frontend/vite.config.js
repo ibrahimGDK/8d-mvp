@@ -6,7 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: process.env.VITE_API_URL,
+        target: "http://localhost:8000", // PHP built-in server portu
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, "index.php"),
       },
