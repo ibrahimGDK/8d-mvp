@@ -102,7 +102,7 @@ export default function ProblemModal({ editData = null, onSubmit, onClose }) {
             onValueChange={(e) => setForm({ ...form, status: e.detail })}
           >
             <IxSelectItem label="Açık" value="OPEN"></IxSelectItem>
-            <IxSelectItem label="Kapalı" value="CLOSE"></IxSelectItem>
+            <IxSelectItem label="Kapalı" value="CLOSED"></IxSelectItem>
           </IxSelect>
 
           <IxSelect
