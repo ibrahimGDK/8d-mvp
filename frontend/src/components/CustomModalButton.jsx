@@ -10,12 +10,17 @@ import {
 } from "@siemens/ix-react";
 import { useRef } from "react";
 
+
+// Özel Modal bileşeni
 function CustomModal() {
   const modalRef = useRef < ModalRef > null;
-
+  
+  // Modal'ı kapatma fonksiyonu, close payload gönderebilir
   const close = () => {
     modalRef.current?.close("close payload!");
   };
+  
+  // Modal'ı iptal etme
   const dismiss = () => {
     modalRef.current?.dismiss("dismiss payload");
   };
@@ -48,6 +53,7 @@ function CustomModal() {
   );
 }
 
+// Modal'ı iptal etme / dismiss etme fonksiyonu, dismiss payload gönderebilir
 export default () => {
   async function show() {
     await showModal({

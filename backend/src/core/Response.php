@@ -1,6 +1,5 @@
 <?php
 
-// Composer'sız ilerlediğimiz için şimdilik namespace kullanmıyoruz.
 
 class Response {
     /**
@@ -24,7 +23,7 @@ class Response {
     }
     
     /**
-     * Başarılı bir yanıt döndürmek için kısayol.
+     * Başarılı bir yanıt döndürmek için.
      * @param mixed $data
      * @param int $statusCode
      * @return void
@@ -37,7 +36,7 @@ class Response {
     }
     
     /**
-     * Hata yanıtı döndürmek için kısayol.
+     * Hata yanıtı döndürmek için.
      * @param string $message
      * @param int $statusCode
      * @return void

@@ -1,10 +1,6 @@
 <?php
 
-/* namespace App\Config;
 
-use PDO;
-use PDOException;
-use Exception; */
 
 class Database {
     
@@ -25,12 +21,11 @@ class Database {
             $dsn = "mysql:host=$host;port=$port;dbname=$db;charset=utf8mb4";
 
             try {
-                // Enterprise Seviye Ayarlar
                 $options = [
                     PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION, // Hataları gizleme, fırlat
-                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,       // Her zaman dizi olarak çek (Obj değil)
+                    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,       // Her zaman dizi olarak çek
                     PDO::ATTR_EMULATE_PREPARES   => false,                  // SQL Injection korumasını DB seviyesine çek
-                    PDO::ATTR_PERSISTENT         => true                    // Bağlantı havuzu (Opsiyonel ama performansı artırır)
+                    PDO::ATTR_PERSISTENT         => true                    // Bağlantı havuzu
                 ];
 
                 self::$conn = new PDO($dsn, $user, $pass, $options);

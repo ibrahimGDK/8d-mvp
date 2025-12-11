@@ -1,18 +1,21 @@
-// src/hooks/useCauses.js
+// React Query kullanarak Cause verilerini çekme ve yönetme hook'ları
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CausesApi } from "../api/causesApi";
 
+// Problem ID'sine göre tüm sebepleri çek
 export const useCausesByProblem = (problemId) => {
   return useQuery({
     queryKey: ["causes", problemId],
     queryFn: async () => {
       const res = await CausesApi.getByProblem(problemId);
-      return res.data; // sadece array döndür
+      return res.data;
     },
     enabled: !!problemId,
   });
 };
 
+// Problem ID'sine göre tüm sebepleri çek
 export const useCreateCause = () => {
   const queryClient = useQueryClient();
 
@@ -21,7 +24,7 @@ export const useCreateCause = () => {
     onSuccess: (response, variables) => {
       console.log("Mutation Response:", response);
       console.log("Mutation Variables:", variables);
-      const problemId = variables?.problem_id; // backend'e gönderdiğin doğru alan
+      const problemId = variables?.problem_id;
       if (problemId) {
         console.log("Invalidating Query for Problem ID:", problemId);
         queryClient.invalidateQueries(["causes", problemId]);
@@ -30,6 +33,7 @@ export const useCreateCause = () => {
   });
 };
 
+// Mevcut sebebi güncelleme
 export const useUpdateCause = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -41,6 +45,7 @@ export const useUpdateCause = () => {
   });
 };
 
+// Sebep silme
 export const useDeleteCause = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -52,6 +57,7 @@ export const useDeleteCause = () => {
   });
 };
 
+// Kök neden olarak işaretleme veya kaldırma
 export const useMarkAsRoot = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -64,6 +70,7 @@ export const useMarkAsRoot = () => {
   });
 };
 
+// Kök neden aksiyon planını kaydetme
 export const useSaveActionPlan = () => {
   const queryClient = useQueryClient();
   return useMutation({

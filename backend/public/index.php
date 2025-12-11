@@ -27,15 +27,16 @@ function loadEnv($filePath) {
             $value = trim($value);
 
             if ($key !== '') {
-                putenv("$key=$value");
+                putenv("$key=$value"); // Ortama değişken ekle
             }
         }
     }
 }
 
-// Backend klasöründe .env dosyasını yükle
+//  .env dosyasını yükle
 loadEnv(__DIR__ . '/../.env');
 
+// ENV değişkenlerini oku
 $DB_HOST = getenv('DB_HOST');
 $DB_PORT = getenv('DB_PORT') ?: 3308;
 $DB_NAME = getenv('DB_NAME');
@@ -52,7 +53,7 @@ $DB_PASS = getenv('DB_PASS');
 require_once __DIR__ . '/../src/Core/Response.php';
 require_once __DIR__ . '/../src/config/db.php';
 
-// Modeller (Bağımlı olduğu başka bir model yoksa önce onları yükle)
+// Modeller 
 require_once __DIR__ . '/../src/models/Problem.php';
 require_once __DIR__ . '/../src/models/Cause.php';
 
@@ -98,27 +99,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 // =======================================================
 
 
-/*$requestUri = $_SERVER['REQUEST_URI'];         // Örn: /8d-mvp/backend/public/index.php/problems/1
-$scriptName = $_SERVER['SCRIPT_NAME'];         // Örn: /8d-mvp/backend/public/index.php
 
-// Kök yolu (Script Name) kısmını URI'den siliyoruz.
-$uri = str_replace($scriptName, '', $requestUri);
-
-// Geriye sadece temiz path kalır: /problems/1
-$uri = trim(parse_url($uri, PHP_URL_PATH), '/'); // Sonuç: "problems/1"
-$segments = explode('/', $uri);                   // Sonuç: ['problems', '1']
-*/
-
-// Örn: /8d-mvp/backend/public/index.php/problems/1
+// İstek yapılan URI’yi al
 $requestUri = $_SERVER['REQUEST_URI'];
 
-// Örn: /8d-mvp/backend/public
+// Mevcut dizin yolunu al
 $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
 
-// Base path'i URI'den çıkar
+// URI'den base path'i çıkar
 $cleanedUri = $requestUri;
-
-// Base path root değilse temizle
 if ($basePath !== '/') {
     $cleanedUri = preg_replace('#^' . preg_quote($basePath) . '#', '', $cleanedUri);
 }
@@ -139,19 +128,12 @@ $controllerName = 'Problem';
 $action = 'index';
 $id = null; // URI'deki ID parametresi
 
-// Örnek URI yapısı: /api/problems/123
-
-// URI'nin ilk segmenti "api" veya "backend" olabilir, onu atlayalım.
-// BU KISIM ARTIK GEREKSİZ OLABİLİR AMA YİNE DE KALSIN:
-// if ($segments[0] === 'api' || $segments[0] === 'backend') {
-//     array_shift($segments); 
-// }
 
 // 1. Segment: Controller (Örn: problems -> ProblemController)
 if (!empty($segments[0])) {
     $controllerName = ucfirst(strtolower($segments[0]));
     // "problems" -> "Problem" Controller
-    if (substr($controllerName, -1) === 's') { // Çoğuldan tekile çevir (Basit yaklasim)
+    if (substr($controllerName, -1) === 's') { // Çoğuldan tekile çevir
          $controllerName = rtrim($controllerName, 's');
     }
 }
@@ -161,20 +143,18 @@ $fullControllerName = $controllerName . 'Controller';
 if (isset($segments[1])) {
     if (is_numeric($segments[1])) {
         $id = (int)$segments[1];
-        // Örn: /problems/1 -> show(1) aksiyonu
         $action = 'show'; 
     } else {
-        // Örn: /problems/search -> search() aksiyonu
         $action = strtolower($segments[1]); 
     }
 }
 
-// HTTP Metoduna göre aksiyonu belirle (Basit RESTful yaklaşım)
-if ($method === 'GET' && $id === null) $action = 'index'; // /problems -> index()
-if ($method === 'GET' && $id !== null) $action = 'show';  // /problems/1 -> show(1)
-if ($method === 'POST') $action = 'store';              // POST /problems -> store()
-if ($method === 'PUT' || $method === 'PATCH') $action = 'update'; // PUT /problems/1 -> update(1)
-if ($method === 'DELETE') $action = 'destroy';          // DELETE /problems/1 -> destroy(1)
+// HTTP Metoduna göre aksiyonu belirle 
+if ($method === 'GET' && $id === null) $action = 'index';
+if ($method === 'GET' && $id !== null) $action = 'show';
+if ($method === 'POST') $action = 'store';
+if ($method === 'PUT' || $method === 'PATCH') $action = 'update';
+if ($method === 'DELETE') $action = 'destroy';
 
 
 // =======================================================
@@ -182,15 +162,15 @@ if ($method === 'DELETE') $action = 'destroy';          // DELETE /problems/1 ->
 // =======================================================
 
 try {
-    // 1. Repository'leri oluştur
+    // Repository'leri oluştur
     $problemRepo = new ProblemRepository(Database::getConnection());
     $causeRepo   = new CauseRepository(Database::getConnection());
 
-    // 2. Servisleri oluştur (Repository'leri Enjekte Et)
+    // Servisleri oluştur (Repository'leri Enjekte Et)
     $problemService = new ProblemService($problemRepo, $causeRepo);
     $causeService   = new CauseService($causeRepo);
 
-    // 3. Controller yönlendirme – Hangi controller istenmişse onu oluştur
+    // Controller yönlendirme – Hangi controller istenmişse onu oluştur
     if ($fullControllerName === 'ProblemController') {
         $controller = new ProblemController($problemService);
 

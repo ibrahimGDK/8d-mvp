@@ -1,6 +1,5 @@
 <?php
 
-// Composer olmadığı için şimdilik namespace kullanmıyoruz.
 
 class ProblemService {
     
@@ -13,11 +12,11 @@ class ProblemService {
     /** @var CauseService */
     private $causeService;
 
-    // Dependency Injection: Gerekli Repository'leri constructor ile alıyoruz.
+    // Dependency Injection
     public function __construct(ProblemRepository $problemRepo, CauseRepository $causeRepo) {
         $this->problemRepo = $problemRepo;
         $this->causeRepo = $causeRepo;
-        $this->causeService = new CauseService($causeRepo); // CauseService'i burada oluşturabiliriz.
+        $this->causeService = new CauseService($causeRepo);
     }
 
     /**
@@ -48,27 +47,18 @@ class ProblemService {
 
         $problemDto = new ProblemResponse($problemRow);
 
-
-        // 2. Problemi Model nesnesine dönüştür
-
-        // 3. İlgili Problemin Tüm Neden-Sonuç verilerini düz liste olarak çek
         $causesFlat = $this->causeRepo->findAllByProblemId($problemId);
         
-        // 4. CauseService'i kullanarak düz listeyi hiyerarşik ağaç yapısına dönüştür
         $causesTreeObjs = $this->causeService->buildTreeAsDtos($causesFlat);
         
-        // convert to arrays
         $causesTreeArr = array_map(fn($c) => $c->toArray(), $causesTreeObjs);
         
-        // Basit tutmak adına, direkt verileri döndürelim:
-
         return [
             'problem' => $problemDto->toArray(),
             'causes_tree' => $causesTreeArr
         ];
     }
 
-    // CREATE
     // CREATE
     public function createProblem(ProblemCreateRequest $dto): ProblemResponse {
         $payload = [

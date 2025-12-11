@@ -1,4 +1,4 @@
-// src/components/ProblemTable.jsx
+// Problem listesi için Ag-Grid tablosu bileşeni
 
 import React, { useEffect, useMemo, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
@@ -10,6 +10,7 @@ import { IxButton } from "@siemens/ix-react";
 import { useNavigate } from "react-router-dom";
 import { useProblemList, useDeleteProblem } from "../hooks/useProblems";
 
+// Ag-Grid modüllerini kaydet
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 export default function ProblemTable({ openEditModal }) {
@@ -29,6 +30,7 @@ export default function ProblemTable({ openEditModal }) {
     }
   }, []);
 
+  // Row işlemleri
   const onView = (row) => navigate(`/problems/${row.id}`);
   const onEdit = (row) => openEditModal(row);
   const onDelete = async (row) => {
@@ -41,6 +43,7 @@ export default function ProblemTable({ openEditModal }) {
     }
   };
 
+  // Action butonları cell renderer
   const ActionCell = (props) => {
     const row = props.data;
     return (
@@ -65,7 +68,8 @@ export default function ProblemTable({ openEditModal }) {
       </div>
     );
   };
-
+  
+  // Tablo kolonları
   const columnDefs = useMemo(
     () => [
       { field: "id", headerName: "ID", minWidth: 90 },

@@ -1,5 +1,7 @@
 <?php
 
+// "Cause" güncelleme işlemleri için kullanılan DTO sınıfı
+
 class CauseUpdateRequest
 {
     private array $raw;

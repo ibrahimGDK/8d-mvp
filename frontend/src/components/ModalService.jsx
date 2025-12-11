@@ -1,15 +1,14 @@
-// src/components/ModalService.jsx
 import { showModal } from "@siemens/ix-react";
 import ProblemModal from "./ProblemModal";
 
-/**
- * openProblemModal(onSaved, editData)
- * - onSaved: listeyi yenilemek için callback (Dashboard.load)
- * - editData: (opsiyonel) mevcut kayıt objesi gönderilirse modal edit modunda açılır
- */
+// Problem Modal'ı açmak için yardımcı fonksiyon
+// onSaved: form submit sonrası yapılacak işlem
+// editData: mevcut veriyi düzenlemek için opsiyonel
+
 export function openProblemModal(onSaved, editData = null) {
   let modalRef = null;
-
+  
+  // Modal'ı güvenli bir şekilde kapatma fonksiyonu
   const closeModal = () => {
     try {
       if (modalRef?.close) modalRef.close();
@@ -20,21 +19,21 @@ export function openProblemModal(onSaved, editData = null) {
     }
   };
 
+  // Modal'ı aç
   modalRef = showModal({
     content: (
       <ProblemModal
         editData={editData}
         onSubmit={async (form) => {
-          await onSaved(form); // önce kayıt işlemini bitir
-          closeModal(); // sonra modalı kapat
+          await onSaved(form);
+          closeModal();
         }}
-        onClose={closeModal} // İPTAL → kapat
+        onClose={closeModal}
       />
     ),
     config: { size: "640" },
   });
 
-  // modalRef.addEventListener("close", () => closeModal());
 
   return modalRef;
 }

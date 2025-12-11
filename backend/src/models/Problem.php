@@ -1,7 +1,7 @@
 <?php
-
+// Problem model sınıfı
 class Problem {
-    // Veritabanı sütunlarıyla eşleşen özellikler
+
     public $id;
     public $title;
     public $description;
@@ -11,7 +11,7 @@ class Problem {
     public $created_at;
     public $updated_at;
 
-    // Basit bir constructor (isteğe bağlı)
+
     public function __construct($data = []) {
         $this->id = $data['id'] ?? null;
         $this->title = $data['title'] ?? null;

@@ -1,4 +1,5 @@
-// src/pages/ProblemDetail.jsx
+// Belirli bir problemi ve ona ait nedenleri (cause) detaylı olarak gösterir
+// Kullanıcı kök nedenleri yönetebilir, yeni neden ekleyebilir, silme ve aksiyon planı kaydedebilir
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useProblemQuery } from "../hooks/useProblems";
@@ -17,7 +18,8 @@ export default function ProblemDetail() {
   const { id } = useParams();
   const { data: problemResponse, isLoading: problemLoading } =
     useProblemQuery(id);
-
+  
+    // Problem ile ilişkili causes çek
   const {
     data: causesResponse,
     isLoading: causesLoading,
@@ -38,10 +40,8 @@ export default function ProblemDetail() {
   const problem = problemResponse?.data?.problem;
   if (!problem) return <div style={{ padding: 20 }}>Problem bulunamadı.</div>;
 
-  // causesResponse is the axios response — extract array
   const causes = causesResponse?.data || [];
 
-  // Handlers wired to hooks:
   const handleAddCause = async (parentId, title, problemId) => {
     if (!title || !title.trim()) {
       alert("Lütfen bir başlık giriniz.");
@@ -52,11 +52,9 @@ export default function ProblemDetail() {
       title: title.trim(),
       problem_id: problem.id,
       parent_id: parentId === "root" ? null : parentId,
-      // also pass problemId for cache invalidation convenience
       problemId: problemId ?? problem.id,
     };
     await createMutation.mutateAsync(payload);
-    // refetch is optional because hook invalidation should refresh — but safe to refetch
     await refetchCauses();
   };
 
@@ -69,7 +67,7 @@ export default function ProblemDetail() {
     await markRootMutation.mutateAsync({
       id: causeId,
       problemId: problem.id,
-      is_root_cause: isRoot, // toggle edilen değer gönderiliyor
+      is_root_cause: isRoot,
     });
     await refetchCauses();
   };
@@ -84,7 +82,6 @@ export default function ProblemDetail() {
   };
 
   const handleUpdateCause = async (causeId, data) => {
-    // if you need to update title or other fields
     await updateMutation.mutateAsync({
       id: causeId,
       data,
@@ -160,7 +157,7 @@ export default function ProblemDetail() {
                 onDeleteCause={handleDeleteCause}
                 onMarkRoot={handleMarkRoot}
                 onSaveAction={handleSaveAction}
-                onUpdateCause={handleUpdateCause} // optional, if your tree supports update
+                onUpdateCause={handleUpdateCause}
               />
             </ix-card-content>
           </ix-card>

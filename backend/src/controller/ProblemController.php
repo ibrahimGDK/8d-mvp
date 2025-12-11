@@ -1,13 +1,12 @@
 <?php
 
-// Composer olmadığı için şimdilik namespace kullanmıyoruz.
 
 class ProblemController {
     
     /** @var ProblemService */
     private $problemService;
 
-    // Dependency Injection: Service'i constructor ile alıyoruz.
+    // Dependency Injection
     public function __construct(ProblemService $problemService) {
         $this->problemService = $problemService;
     }
@@ -48,7 +47,6 @@ class ProblemController {
         }
     }
     
-    // NOT: POST, PUT, DELETE aksiyonları da burada tanımlanacaktır (store, update, destroy).
 
     /**
      * [POST] /problems - Yeni bir problem kaydı oluşturur. (store)

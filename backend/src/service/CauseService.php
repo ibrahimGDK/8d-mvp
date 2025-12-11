@@ -1,6 +1,5 @@
 <?php
 
-// Composer olmadığı için şimdilik namespace kullanmıyoruz.
 
 class CauseService {
     
@@ -18,10 +17,8 @@ class CauseService {
     }
 
     /**
-     * Düz listeyi (flat list) hiyerarşik bir ağaç yapısına dönüştürür.
-     * Bu fonksiyon, N+1 Probleminden kaçınmanın en temiz yoludur.
      *
-     * @param array $flatList Tüm nedenleri içeren düz liste (array of arrays)
+     * @param array $flatList Tüm nedenleri içeren düz liste
      * @param int|null $parentId Hangi ana kayda bakacağımızı belirtir.
      * @return array Ağaç yapısındaki dallar.
      */

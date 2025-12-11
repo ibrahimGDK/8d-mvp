@@ -1,5 +1,7 @@
 <?php
 
+// Yeni bir "Cause" oluşturmak için gelen veriyi temsil eden DTO sınıfı
+
 class CauseCreateRequest
 {
     private array $raw;
@@ -13,7 +15,6 @@ class CauseCreateRequest
     {
         $this->raw = $data;
         $this->problem_id = array_key_exists('problem_id', $data) ? (int)$data['problem_id'] : null;
-        //$this->parent_id = array_key_exists('parent_id', $data) ? (int)$data['parent_id'] : null;
         $this->parent_id = array_key_exists('parent_id', $data) ? $data['parent_id'] : null;
         $this->title = array_key_exists('title', $data) ? $data['title'] : null;
         $this->is_root_cause = array_key_exists('is_root_cause', $data) ? (int)$data['is_root_cause'] : 0;

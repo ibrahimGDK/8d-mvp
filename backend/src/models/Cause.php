@@ -1,15 +1,15 @@
 <?php
 
+// Cause model sınıfı
 class Cause {
     public $id;
     public $problem_id;
-    public $parent_id; // Ağaç yapısı için kritik
+    public $parent_id; 
     public $title;
-    public $is_root_cause; // Kök neden mi? (boolean)
-    public $action_plan; // D5 - Kalıcı çözüm
+    public $is_root_cause; 
+    public $action_plan; 
     public $created_at;
 
-    // Ağaç yapısı oluşturulurken children (çocuk) verileri buraya eklenecek
     public $children = [];
 
     public function __construct($data = []) {

@@ -1,4 +1,5 @@
 <?php
+// "Problem" güncelleme işlemleri için kullanılan DTO sınıfı
 
 class ProblemUpdateRequest
 {

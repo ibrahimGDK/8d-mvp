@@ -1,29 +1,32 @@
-// hooks/useProblems.js
+// React Query kullanarak Problem verilerini çekme ve yönetme hook'ları
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ProblemsApi } from "../api/problemsApi";
 
+// Tüm problemleri çek
 export const useProblemList = () => {
   return useQuery({
     queryKey: ["problems"],
     queryFn: async () => {
       const res = await ProblemsApi.getAll();
-      // backend structure: res.data = { status: 'success', data: [...] }
       return res.data?.data || [];
     },
   });
 };
 
+// Tek bir problem detayını çek
 export const useProblemQuery = (id) => {
   return useQuery({
     queryKey: ["problems", id],
     queryFn: async () => {
       const res = await ProblemsApi.getById(id);
-      return res.data; // burası önemli: sadece problem objesini döndür
+      return res.data;
     },
     enabled: !!id,
   });
 };
 
+// Yeni problem oluşturma
 export const useCreateProblem = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -34,6 +37,7 @@ export const useCreateProblem = () => {
   });
 };
 
+// Mevcut problemi güncelleme
 export const useUpdateProblem = () => {
   const queryClient = useQueryClient();
   return useMutation({
@@ -45,6 +49,7 @@ export const useUpdateProblem = () => {
   });
 };
 
+// Problem silme
 export const useDeleteProblem = () => {
   const queryClient = useQueryClient();
   return useMutation({

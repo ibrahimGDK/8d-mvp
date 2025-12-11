@@ -1,4 +1,5 @@
 <?php
+// Cause verisini API'ye geri döndürmek için kullanılan Response DTO'su
 
 class CauseResponse
 {

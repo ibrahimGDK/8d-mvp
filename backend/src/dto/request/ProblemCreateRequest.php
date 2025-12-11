@@ -1,5 +1,7 @@
 <?php
 
+// Yeni bir "Problem" oluşturmak için gelen veriyi temsil eden DTO sınıfı
+
 class ProblemCreateRequest
 {
     private array $raw;

@@ -1,20 +1,18 @@
 <?php
 
-// Composer olmadığı için şimdilik namespace kullanmıyoruz.
 
 class CauseRepository {
     
     /** @var PDO */
     private $db;
 
-    // Dependency Injection: PDO bağlantısını dışarıdan alıyoruz.
+    // Dependency Injection
     public function __construct(PDO $db) {
         $this->db = $db;
     }
 
     /**
      * Belirli bir Problem ID'sine ait TÜM nedenleri TEK bir sorgu ile çeker.
-     * Bu, N+1 probleminden kaçınmak için kritik!
      * @param int $problemId
      * @return array
      */
@@ -22,18 +20,17 @@ class CauseRepository {
         $sql = "SELECT id, problem_id, parent_id, title, is_root_cause, action_plan 
                 FROM causes 
                 WHERE problem_id = :problem_id 
-                ORDER BY parent_id ASC, id ASC"; // Verilerin sıralı gelmesi faydalı
+                ORDER BY parent_id ASC, id ASC"; 
         
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':problem_id', $problemId, PDO::PARAM_INT);
         $stmt->execute();
         
-        // Ham ve düz (flat) listeyi döndür
         return $stmt->fetchAll(); 
     }
     
-    // NOT: Bu katmanın görevi veriyi çekmek. Ağaç yapısına dönüştürme işi Service katmanında yapılacak.
 
+    // ID'ye göre tek bir cause kaydı getirir
     public function findById(int $id): ?array {
         $stmt = $this->db->prepare("SELECT * FROM causes WHERE id = :id");
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
@@ -43,6 +40,8 @@ class CauseRepository {
         return $data ?: null;
     }
 
+    
+    // Yeni bir cause kaydı oluşturur ve insert edilen ID'yi döndürür
     public function create(array $data): int {
         $sql = "INSERT INTO causes (problem_id, parent_id, title, is_root_cause, action_plan)
                 VALUES (:problem_id, :parent_id, :title, :is_root_cause, :action_plan)";
@@ -59,6 +58,8 @@ class CauseRepository {
         return $this->db->lastInsertId();
     }
 
+    
+    // Bir cause kaydını günceller
     public function update(int $id, array $data): bool {
         $sql = "UPDATE causes 
                 SET title = :title, parent_id = :parent_id, is_root_cause = :is_root_cause, action_plan = :action_plan
@@ -75,6 +76,8 @@ class CauseRepository {
         ]);
     }
 
+    
+    // ID'ye göre cause kaydını siler
     public function delete(int $id): bool {
         $stmt = $this->db->prepare("DELETE FROM causes WHERE id = :id");
         return $stmt->execute([':id' => $id]);

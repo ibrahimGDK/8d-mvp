@@ -1,4 +1,4 @@
-// src/pages/Dashboard.jsx
+// Ana dashboard sayfası, problem listesini gösterir ve CRUD işlemlerini başlatır
 
 import { IxButton } from "@siemens/ix-react";
 import ProblemTable from "../components/ProblemTable";
@@ -10,15 +10,21 @@ import {
 } from "../hooks/useProblems";
 
 export default function Dashboard() {
+  // Tüm problem listesini çek
   const { data: problems, isLoading: loading } = useProblemList();
+  // Tüm problem listesini çek
   const createProblemMutation = useCreateProblem();
+
+  // Mevcut problemi güncellemek için mutation
   const updateProblemMutation = useUpdateProblem();
 
+  // "Yeni Problem" butonuna tıklandığında modal aç ve formu submit et
   const handleCreate = () =>
     openProblemModal(async (form) => {
       await createProblemMutation.mutateAsync(form);
     });
 
+  // "Güncelle" işlemi: modal aç ve mevcut problem ile formu submit et
   const handleEdit = (existingProblem) =>
     openProblemModal(async (form) => {
       await updateProblemMutation.mutateAsync({

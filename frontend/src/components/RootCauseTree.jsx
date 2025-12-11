@@ -21,21 +21,24 @@ export default function RootCauseTree({
   onSaveAction,
   onUpdateCause,
 }) {
-  const [addingFor, setAddingFor] = useState(null);
-  const [newTitle, setNewTitle] = useState("");
-  const [expanded, setExpanded] = useState({});
-  const [editingActionFor, setEditingActionFor] = useState(null);
-  const [actionText, setActionText] = useState("");
-  const [editingTitleFor, setEditingTitleFor] = useState(null);
-  const [editedTitle, setEditedTitle] = useState("");
+  const [addingFor, setAddingFor] = useState(null); // Hangi node için yeni sebep ekleniyor
+  const [newTitle, setNewTitle] = useState(""); // Yeni sebep başlığı
+  const [expanded, setExpanded] = useState({}); // Node genişletme durumu
+  const [editingActionFor, setEditingActionFor] = useState(null); // Kök neden aksiyon düzenleme
+  const [actionText, setActionText] = useState(""); // Düzenlenen aksiyon
+  const [editingTitleFor, setEditingTitleFor] = useState(null); // Sebep başlığı düzenleme
+  const [editedTitle, setEditedTitle] = useState(""); // Düzenlenen başlık
 
+  // Node expand/collapse toggle
   const toggleExpand = (id) => setExpanded((s) => ({ ...s, [id]: !s[id] }));
 
+  // Kök neden aksiyon düzenlemeyi başlat
   const startEditAction = (node) => {
     setEditingActionFor(node.id);
     setActionText(node.action_plan || "");
   };
 
+  // Aksiyon kaydet
   const saveAction = async (node) => {
     if (typeof onSaveAction === "function") {
       await onSaveAction(node.id, actionText);
@@ -44,11 +47,13 @@ export default function RootCauseTree({
     }
   };
 
+  // Başlık düzenlemeyi başlat
   const startEditTitle = (node) => {
     setEditingTitleFor(node.id);
     setEditedTitle(node.title);
   };
 
+  // Başlık kaydet
   const saveTitle = async (node) => {
     if (!editedTitle.trim()) {
       alert("Başlık boş olamaz.");
@@ -61,6 +66,7 @@ export default function RootCauseTree({
     }
   };
 
+  // Başlık kaydet
   const addChild = async (parentId) => {
     if (!newTitle.trim()) {
       alert("Lütfen bir başlık girin.");
@@ -73,6 +79,7 @@ export default function RootCauseTree({
     }
   };
 
+  // Node silme
   const deleteNode = async (nodeId) => {
     if (
       !confirm(
@@ -85,6 +92,7 @@ export default function RootCauseTree({
     }
   };
 
+  // Kök neden işaretle/kaldır
   const markRoot = async (node) => {
     if (typeof onMarkRoot === "function") {
       const newValue = node.is_root_cause === 1 ? 0 : 1;
@@ -92,6 +100,7 @@ export default function RootCauseTree({
     }
   };
 
+  // Her bir node'u render et
   const renderNode = (node) => {
     const hasChildren = node.children && node.children.length > 0;
     const isExpanded = !!expanded[node.id];

@@ -1,4 +1,3 @@
-// src/components/ProblemModal.jsx
 
 import React, { useEffect, useState } from "react";
 import {
@@ -47,6 +46,7 @@ export default function ProblemModal({ editData = null, onSubmit, onClose }) {
     }
   }, [isEdit, editData]);
 
+  // Form submit işlemi
   const handleSubmit = async () => {
     if (loading) return;
 

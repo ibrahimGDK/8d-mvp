@@ -1,4 +1,5 @@
 <?php
+// Problem verisini API'ye geri döndürmek için kullanılan Response DTO'su
 
 class ProblemResponse
 {
