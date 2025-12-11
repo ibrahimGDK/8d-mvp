@@ -36,7 +36,7 @@ cd backend
 copy .env.example .env
 
 cd ..
-mysql -u root -p < backend/schema.sql
+mysql -u root -p < backend/database/schema.sql
 
 cd frontend
 npm install
