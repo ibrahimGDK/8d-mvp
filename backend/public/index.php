@@ -6,12 +6,41 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 
-// Veritabanı ayarlarını burada geçici olarak tanımlıyoruz (Senior pratik, ama Composer olmadığı için geçici çözüm)
-putenv("DB_HOST=127.0.0.1");
-putenv("DB_PORT=3308"); // Senin düzelttiğin port
-putenv("DB_NAME=8d_db"); 
-putenv("DB_USER=root"); 
-putenv("DB_PASS=123456");
+
+
+// =======================================================
+// A. .env Dosyasını Yükleme (Manuel)
+// =======================================================
+function loadEnv($filePath) {
+    if (!file_exists($filePath)) return;
+
+    $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+
+    foreach ($lines as $line) {
+        // Yorumları atla
+        if (strpos(trim($line), '#') === 0) continue;
+
+        // KEY=VALUE formatını parçala
+        if (strpos($line, '=') !== false) {
+            [$key, $value] = explode('=', $line, 2);
+            $key = trim($key);
+            $value = trim($value);
+
+            if ($key !== '') {
+                putenv("$key=$value");
+            }
+        }
+    }
+}
+
+// Backend klasöründe .env dosyasını yükle
+loadEnv(__DIR__ . '/../.env');
+
+$DB_HOST = getenv('DB_HOST');
+$DB_PORT = getenv('DB_PORT') ?: 3308;
+$DB_NAME = getenv('DB_NAME');
+$DB_USER = getenv('DB_USER');
+$DB_PASS = getenv('DB_PASS');
 
 
 

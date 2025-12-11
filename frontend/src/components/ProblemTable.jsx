@@ -51,13 +51,13 @@ export default function ProblemTable({ openEditModal }) {
           title="Detay"
         />
         <IxButton
-          icon="edit"
+          icon="edit-document"
           variant="primary"
           onClick={() => props.context.onEdit(row)}
           title="Güncelle"
         />
         <IxButton
-          icon="delete"
+          icon="trashcan"
           variant="danger"
           onClick={() => props.context.onDelete(row)}
           title="Sil"

@@ -19,7 +19,6 @@ class Database {
             $host = getenv('DB_HOST') ?: '127.0.0.1';
             $db   = getenv('DB_NAME') ?: '8d_db';
             $user = getenv('DB_USER') ?: 'root';
-            $pass = getenv('DB_PASS') ?: '';
             $port = getenv('DB_PORT') ?: '3308';
             $pass = getenv('DB_PASS') ?: '123456';
 

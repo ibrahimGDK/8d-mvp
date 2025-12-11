@@ -152,13 +152,12 @@ export default function RootCauseTree({
               }}
             />
             <IxButton
-              icon="edit"
+              icon="edit-document"
               variant="outline"
               title="Sebepi Güncelle"
               onClick={() => startEditTitle(node)}
-            >
-              Sebepi Güncelle
-            </IxButton>
+            />
+
             <IxButton
               icon="target"
               variant={node.is_root_cause === 1 ? "primary" : "outline"}
@@ -168,15 +167,10 @@ export default function RootCauseTree({
                   : "Kök Neden Olarak İşaretle"
               }
               onClick={() => markRoot(node)}
-            >
-              {node.is_root_cause === 1
-                ? "Kök Nedeni Kaldır"
-                : "Kök Neden Olarak İşaretle"}
-            </IxButton>
+            />
 
             <IxButton
-              icon="trash"
-              variant="danger"
+              icon="trashcan"
               title="Sil"
               onClick={() => deleteNode(node.id)}
             />

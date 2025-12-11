@@ -61,7 +61,6 @@ export default function ProblemDetail() {
   };
 
   const handleDeleteCause = async (causeId) => {
-
     await deleteMutation.mutateAsync({ id: causeId, problemId: problem.id });
     await refetchCauses();
   };
@@ -131,7 +130,6 @@ export default function ProblemDetail() {
         <ix-tab-item onClick={() => setSelectedTab(1)} icon="tree">
           D4: Kök Neden
         </ix-tab-item>
-
       </ix-tabs>
 
       <div style={{ marginTop: "1.5rem" }}>
@@ -150,7 +148,7 @@ export default function ProblemDetail() {
           <ix-card style={{ width: "100%" }}>
             <ix-card-content>
               <ix-typography format="h5" style={{ marginBottom: "1rem" }}>
-                Neden-Neden Analizi (Ishikawa / Root Cause Tree)
+                Neden Analizi - Kök Neden Ağacı
               </ix-typography>
 
               <RootCauseTree
