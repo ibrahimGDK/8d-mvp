@@ -43,14 +43,16 @@ class CauseController {
 
     /** [POST] /causes */
     public function store(): void {
-        $input = json_decode(file_get_contents("php://input"), true);
+        $input = json_decode(file_get_contents("php://input"), true) ?? [];
 
-        if (empty($input['problem_id']) || empty($input['title'])) {
-            Response::error("problem_id ve title zorunludur.", 422);
+        $dto = new CauseCreateRequest($input);
+        $errors = $dto->validate();
+        if (!empty($errors)) {
+            Response::error(implode(", ", $errors), 422);
         }
 
         try {
-            $id = $this->service->createCause($input);
+            $id = $this->service->createCause($dto);
             Response::success(['id' => $id], 201);
 
         } catch (Exception $e) {
@@ -60,18 +62,19 @@ class CauseController {
 
     /** [PATCH] /causes/{id} */
     public function update(int $id): void {
-        // json_decode null dönebilir; fallback ile boş dizi kullanıyoruz
         $input = json_decode(file_get_contents("php://input"), true) ?? [];
+        $dto = new CauseUpdateRequest($input);
+        $errors = $dto->validateForPatch();
+        if (!empty($errors)) {
+            Response::error($errors, 422);
+        }
 
         try {
-            $ok = $this->service->updateCause($id, $input);
-
+            $ok = $this->service->updateCause($id, $dto);
             if (!$ok) {
                 Response::error("Güncellenecek cause bulunamadı.", 404);
             }
-
             Response::success(["message" => "Cause güncellendi"], 200);
-
         } catch (Exception $e) {
             Response::error("Cause güncellenirken hata: " . $e->getMessage(), 500);
         }

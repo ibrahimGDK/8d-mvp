@@ -57,14 +57,16 @@ class ProblemController {
         // Gelen POST verisini al
         $input = json_decode(file_get_contents("php://input"), true);
         
-        // Veri doğrulama (Validation) burada yapılmalıdır.
-        if (empty($input['title'])) {
-            Response::error("Başlık (title) alanı zorunludur.", 422); // 422 Unprocessable Entity
+
+        $dto = new ProblemCreateRequest($input);
+        $errors = $dto->validate();
+        if (!empty($errors)) {
+            Response::error($errors, 422);
         }
 
         try {
-            $problem = $this->problemService->createProblem($input);
-            Response::success($problem, 201);
+            $created = $this->problemService->createProblem($dto); // returns ProblemResponse
+            Response::success($created, 201);
 
         } catch (Exception $e) {
             Response::error("Problem oluşturulurken hata oluştu: " . $e->getMessage(), 500);
@@ -77,15 +79,19 @@ class ProblemController {
     public function update(int $id): void {
         $input = json_decode(file_get_contents("php://input"), true) ?? [];
 
-
+        $dto = new ProblemUpdateRequest($input);
+        $errors = $dto->validateForPatch();
+        if (!empty($errors)) {
+            Response::error($errors, 422);
+        }
         try {
-            $updated = $this->problemService->updateProblem($id, $input);
+            $updated = $this->problemService->updateProblem($id, $dto);
 
             if (!$updated) {
                 Response::error("Güncellenecek Problem bulunamadı.", 404);
             }
 
-            Response::success($updated, 200);
+            Response::success($updated->toArray(), 200);
 
         } catch (Exception $e) {
             Response::error("Problem güncellenirken hata oluştu: " . $e->getMessage(), 500);

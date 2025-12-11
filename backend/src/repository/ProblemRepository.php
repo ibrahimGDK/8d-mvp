@@ -48,14 +48,18 @@ class ProblemRepository {
      */
     public function insert(array $data): ?array {
         $stmt = $this->db->prepare("
-            INSERT INTO problems (title, description, responsible_team, created_at, updated_at)
-            VALUES (:title, :description, :team, NOW(), NOW())
+            INSERT INTO problems 
+                (title, description, responsible_team, priority, status, created_at, updated_at)
+            VALUES 
+                (:title, :description, :team, :priority, :status, NOW(), NOW())
         ");
 
         $stmt->execute([
             ':title'       => $data['title'],
             ':description' => $data['description'] ?? null,
             ':team'        => $data['responsible_team'] ?? null,
+            ':priority'    => $data['priority'] ?? 'medium',
+            ':status'      => $data['status'] ?? 'open',
         ]);
 
         $id = $this->db->lastInsertId();
@@ -74,6 +78,8 @@ class ProblemRepository {
             SET title = :title,
                 description = :description,
                 responsible_team = :team,
+                priority = :priority,
+                status = :status,
                 updated_at = NOW()
             WHERE id = :id
         ");
@@ -83,6 +89,8 @@ class ProblemRepository {
             ':title'       => $data['title'],
             ':description' => array_key_exists('description', $data) ? $data['description'] : null,
             ':team'        => array_key_exists('responsible_team', $data) ? $data['responsible_team'] : null,
+            ':priority'    => array_key_exists('priority', $data) ? $data['priority'] : null,
+            ':status'      => array_key_exists('status', $data) ? $data['status'] : null,
         ]);
 
         return $this->findById($id);

@@ -13,8 +13,9 @@ class CauseService {
     /** Ağacı oluşturur */
     public function getCauseTree(int $problemId): array {
         $flat = $this->repo->findAllByProblemId($problemId);
-        return $this->buildTree($flat);
-    } 
+        $dtos = $this->buildTreeAsDtos($flat);
+        return array_map(fn($c) => $c->toArray(), $dtos);
+    }
 
     /**
      * Düz listeyi (flat list) hiyerarşik bir ağaç yapısına dönüştürür.
@@ -24,55 +25,51 @@ class CauseService {
      * @param int|null $parentId Hangi ana kayda bakacağımızı belirtir.
      * @return array Ağaç yapısındaki dallar.
      */
-    public function buildTree(array $flatList, $parentId = null): array {
+    public function buildTreeAsDtos(array $flatList, $parentId = null): array {
         $branch = [];
-
         foreach ($flatList as $element) {
-            // PHP'de NULL ile 0 karşılaştırması farklı olduğu için kontrol ediyoruz.
-            // parent_id DB'de null ise (yani ana kök ise), $parentId da null olmalı.
-            $currentParentId = $element['parent_id'] ?? null; 
-            
-            // Eğer bu elemanın parent_id'si, bizim aradığımız parentId ile eşleşiyorsa
+            $currentParentId = isset($element['parent_id']) ? $element['parent_id'] : null;
             if ($currentParentId == $parentId) {
-                
-                // Özyineleme (Recursion): Bu elemanın çocuklarını bulmak için fonksiyonu tekrar çağır.
-                // Bu çağrıda, mevcut elemanın ID'sini yeni parentId olarak veriyoruz.
-                $children = $this->buildTree($flatList, $element['id']);
-                
-                // Eğer çocuk bulunduysa, 'children' anahtarı ile diziye ekle.
-                if ($children) {
-                    $element['children'] = $children;
+                $node = new CauseResponse($element);
+                // find children recursively
+                $children = $this->buildTreeAsDtos($flatList, $element['id']);
+                if (!empty($children)) {
+                    $node->setChildren($children);
                 }
-                
-                // Hazırlanan elemanı (varsa çocuklarıyla birlikte) bu dala (branch) ekle.
-                $branch[] = $element;
+                $branch[] = $node;
             }
         }
-
         return $branch;
     }
+
      /** CRUD */
     public function getSingleCause(int $id): ?array {
-        return $this->repo->findById($id);
+        $row = $this->repo->findById($id);
+        if (!$row) return null;
+        $dto = new CauseResponse($row);
+        return $dto->toArray();
     }
 
-    public function createCause(array $data): int {
-        return $this->repo->create($data);
-    }
-
-    public function updateCause(int $id, array $data): bool {
-        // Mevcut kaydı al
-        $existing = $this->repo->findById($id);
-        if (!$existing) {
-            return false;
-        }
-
-        // PATCH: sadece gönderilen alanları değiştir; gönderilmeyenler korunur.
+    public function createCause(CauseCreateRequest $dto): int {
         $payload = [
-            'title'         => array_key_exists('title', $data) ? $data['title'] : $existing['title'],
-            'parent_id'     => array_key_exists('parent_id', $data) ? $data['parent_id'] : $existing['parent_id'],
-            'is_root_cause' => array_key_exists('is_root_cause', $data) ? $data['is_root_cause'] : $existing['is_root_cause'],
-            'action_plan'   => array_key_exists('action_plan', $data) ? $data['action_plan'] : $existing['action_plan'],
+            'problem_id' => $dto->problem_id,
+            'parent_id' => $dto->parent_id,
+            'title' => $dto->title,
+            'is_root_cause' => $dto->is_root_cause ?? 0,
+            'action_plan' => $dto->action_plan
+        ];
+        return $this->repo->create($payload);
+    }
+
+    public function updateCause(int $id, CauseUpdateRequest $dto): bool {
+        $existing = $this->repo->findById($id);
+        if (!$existing) return false;
+
+        $payload = [
+            'title' => $dto->has('title') ? $dto->title : $existing['title'],
+            'parent_id' => $dto->has('parent_id') ? $dto->parent_id : $existing['parent_id'],
+            'is_root_cause' => $dto->has('is_root_cause') ? $dto->is_root_cause : $existing['is_root_cause'],
+            'action_plan' => $dto->has('action_plan') ? $dto->action_plan : $existing['action_plan']
         ];
 
         return $this->repo->update($id, $payload);

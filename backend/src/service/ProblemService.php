@@ -24,13 +24,15 @@ class ProblemService {
      * Tüm Problem kayıtlarını çeker ve döndürür.
      * @return array<Problem>
      */
+    // GET ALL -> returns array of ProblemResponse->toArray()
     public function getAllProblems(): array {
-        $data = $this->problemRepo->findAll();
-        
-        // Ham veriyi Problem model nesnelerine dönüştür (Mapping)
-        return array_map(function($item) {
-            return new Problem($item);
-        }, $data);
+        $rows = $this->problemRepo->findAll();
+        $out = [];
+        foreach ($rows as $r) {
+            $dto = new ProblemResponse($r);
+            $out[] = $dto->toArray();
+        }
+        return $out;
     }
 
     /**
@@ -41,56 +43,61 @@ class ProblemService {
      */
     public function getProblemWithCauses(int $problemId) {
         // 1. Ana Problemi Çek
-        $problemData = $this->problemRepo->findById($problemId);
+        $problemRow = $this->problemRepo->findById($problemId);
+        if (!$problemRow) return null;
 
-        if (!$problemData) {
-            // Problem bulunamazsa null döndür (veya Controller'da 404 fırlatılabilir)
-            return null;
-        }
+        $problemDto = new ProblemResponse($problemRow);
+
 
         // 2. Problemi Model nesnesine dönüştür
-        $problem = new Problem($problemData);
 
         // 3. İlgili Problemin Tüm Neden-Sonuç verilerini düz liste olarak çek
-        $causesFlatList = $this->causeRepo->findAllByProblemId($problemId);
+        $causesFlat = $this->causeRepo->findAllByProblemId($problemId);
         
         // 4. CauseService'i kullanarak düz listeyi hiyerarşik ağaç yapısına dönüştür
-        $causesTree = $this->causeService->buildTree($causesFlatList);
+        $causesTreeObjs = $this->causeService->buildTreeAsDtos($causesFlat);
         
-        // Opsiyonel: Ağaç yapısını Problem nesnesine özel bir özellikle ekleyebiliriz.
-        // Şimdilik sadece Controller'a gönderelim veya basit bir DTO yapısı kullanabiliriz.
-        
-        // Burada, Problem ve Causes ağacını içeren tek bir yapı döndürmek en iyisidir.
-        // Örn: return ['problem' => $problem, 'causes' => $causesTree];
+        // convert to arrays
+        $causesTreeArr = array_map(fn($c) => $c->toArray(), $causesTreeObjs);
         
         // Basit tutmak adına, direkt verileri döndürelim:
+
         return [
-            'problem' => $problem,
-            'causes_tree' => $causesTree
+            'problem' => $problemDto->toArray(),
+            'causes_tree' => $causesTreeArr
         ];
     }
 
     // CREATE
-    public function createProblem(array $data): Problem {
-        $inserted = $this->problemRepo->insert($data);
-        return new Problem($inserted);
+    // CREATE
+    public function createProblem(ProblemCreateRequest $dto): ProblemResponse {
+        $payload = [
+            'title'            => $dto->title,
+            'description'      => $dto->description,
+            'responsible_team' => $dto->responsible_team,
+            'priority'         => $dto->priority ?? 'medium',
+            'status'           => $dto->status ?? 'open',
+        ];
+        $inserted = $this->problemRepo->insert($payload);
+        return new ProblemResponse($inserted);
     }
 
-    // UPDATE
-    public function updateProblem(int $id, array $data): ?Problem {
-        $existing = $this->problemRepo->findById($id);
-        if (!$existing) {
-            return null;
-        }
-            // PATCH: Sadece gönderilen alanları günceller
-    $payload = [
-        'title'            => array_key_exists('title', $data) ? $data['title'] : $existing['title'],
-        'description'      => array_key_exists('description', $data) ? $data['description'] : $existing['description'],
-        'responsible_team' => array_key_exists('responsible_team', $data) ? $data['responsible_team'] : $existing['responsible_team'],
-    ];
 
-        $updated = $this->problemRepo->updateRecord($id, $payload);
-        return $updated ? new Problem($updated) : null;
+    // UPDATE - PATCH
+    public function updateProblem(int $id, ProblemUpdateRequest $dto): ?ProblemResponse {
+        $existing = $this->problemRepo->findById($id);
+        if (!$existing) return null;
+
+        $payload = [
+            'title'             => $dto->has('title') ? $dto->title : $existing['title'],
+            'description'       => $dto->has('description') ? $dto->description : $existing['description'],
+            'responsible_team'  => $dto->has('responsible_team') ? $dto->responsible_team : $existing['responsible_team'],
+            'priority'          => $dto->has('priority') ? $dto->priority : $existing['priority'],
+            'status'            => $dto->has('status') ? $dto->status : $existing['status'],
+        ];
+
+        $updatedRow = $this->problemRepo->updateRecord($id, $payload);
+        return $updatedRow ? new ProblemResponse($updatedRow) : null;
     }
 
     // DELETE

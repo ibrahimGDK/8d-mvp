@@ -39,6 +39,14 @@ require_once __DIR__ . '/../src/service/ProblemService.php';
 require_once __DIR__ . '/../src/controller/ProblemController.php';
 require_once __DIR__ . '/../src/controller/CauseController.php';
 
+// DTO'lar
+require_once __DIR__ . '/../src/dto/request/ProblemCreateRequest.php';
+require_once __DIR__ . '/../src/dto/request/ProblemUpdateRequest.php';
+require_once __DIR__ . '/../src/dto/request/CauseCreateRequest.php';
+require_once __DIR__ . '/../src/dto/request/CauseUpdateRequest.php';
+
+require_once __DIR__ . '/../src/dto/response/ProblemResponse.php';
+require_once __DIR__ . '/../src/dto/response/CauseResponse.php';
 
 // =======================================================
 // B. Ortak Ayarlar ve CORS
