@@ -1,6 +1,6 @@
-# 🚀 8D Problem Çözme Uygulaması (MVP)
+#  8D Problem Çözme Uygulaması (MVP)
 
-Bu proje, bir üretim veya kurumsal ortamda yaygın olarak kullanılan Kalite Yönetimi aracı olan 8D Problem Çözme Metodolojisini dijitalleştiren Full Stack bir prototiptir.
+Bu proje, bir üretimde veya kurumsal ortamda yaygın olarak kullanılan Kalite Yönetimi aracı olan 8D Problem Çözme Metodolojisini dijitalleştiren Full Stack bir prototiptir.
 
 Projenin temel amacı, karmaşık Kök Neden Analizi (D4/D5) süreçlerini, yüksek performanslı ve hiyerarşik (Ağaç Yapısı) bir API ile yönetme yeteneğimizi göstermektir.
 
@@ -16,11 +16,11 @@ Projeyi başarıyla çalıştırmak için sisteminizde aşağıdaki yazılımlar
 | :------------------ | :-------------- | :--------------------------------------------------- |
 | **PHP**             | 8.2 veya üzeri  | Backend için gereklidir.                             |
 | **Node.js**         | 22 veya üzeri   | Frontend geliştirme ortamı ve `npm` için gereklidir. |
-| **MySQL / MariaDB** | 10.4 veya üzeri | Veritabanı yönetim sistemi.                          |
+| **MySQL  | 10.4 veya üzeri | Veritabanı yönetim sistemi.                          |
 
 ### ⚙️ Adım Adım Kurulum
 
-Lütfen adımları belirtilen sırayla takip edin.
+Lütfen adımları belirtilen sırayla uygulayın.
 
 ```bash
 git clone https://github.com/ibrahimGDK/8d-mvp.git
