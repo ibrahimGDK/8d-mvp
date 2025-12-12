@@ -83,7 +83,7 @@ export default function ProblemTable({ openEditModal }) {
           switch (params.value?.toLowerCase()) {
             case "open":
               return "Açık";
-            case "close":
+            case "closed":
               return "Kapalı";
             default:
               return params.value ?? "-";
